@@ -5,13 +5,13 @@ globals
   closed-lane          ;; the closed lane
   closed-lane?         ;; true if a lane is closed
 
-  ;; lane densities for deciding what lane is most favorable
+  ;; lane densities for deciding what lane is most favorable, updated each tick
   left-lane-density
   middle-lane-density
   right-lane-density
 ]
 
-turtles-own
+turtles-own            ;; These variables all apply to only one car
 [
   speed                ;; the current speed of the car
   speed-limit          ;; the maximum speed of the car (different for all cars)
@@ -26,7 +26,7 @@ turtles-own
   max-wait-ticks       ;; random number that dictates how long a car waits before it chooses a better lane
   current-position     ;; saves current position to compare to later position
 
-  ;;surrounding cars. for all variables: true if a car is present at the indicated position
+  ;; surrounding cars. for all variables: true if a car is present at the indicated position
   car-to-side-left?
   car-to-side-right?
   car-in-front?
@@ -35,34 +35,35 @@ turtles-own
 ]
 
 to setup
-  clear-all
-  draw-road
-  set-default-shape turtles "car"
-  create-turtles number [ setup-cars ]
+  clear-all                            ;; clear area
+  draw-road                            ;; draw road and surroundings
+  set-default-shape turtles "car"      ;; give cars their shape
+  create-turtles number [ setup-cars ] ;; create cars
   reset-ticks
   set closed-lane? false
   set closed-lane -10
 end
 
+;; Function to draw road and surroundings
 to draw-road
   ask patches [
-    set pcolor green
-    if ((pycor > -6) and (pycor < 6)) [ set pcolor gray ]
-    if ((pycor = 2) and ((pxcor mod 3) = 2)) [ set pcolor white ]
-    if ((pycor = -2) and ((pxcor mod -3) = -2)) [ set pcolor white ]
-    if ((pycor = 6) or (pycor = -6)) [ set pcolor black ]
+    set pcolor green                                                  ;; Color all patches green for grass
+    if ((pycor > -6) and (pycor < 6)) [ set pcolor gray ]             ;; Color patches with -6 < ycor < 6 gray for road
+    if ((pycor = 2) and ((pxcor mod 3) = 2)) [ set pcolor white ]     ;; Color every third patch with ycor 2 or -2 white
+    if ((pycor = -2) and ((pxcor mod -3) = -2)) [ set pcolor white ]  ;;  for lane separators on road
+    if ((pycor = 6) or (pycor = -6)) [ set pcolor black ]             ;; Color patches with ycor 6 or -6 black for borders of road
   ]
 end
 
 to setup-cars
-  set color (random 140)
-  setxy random-xcor one-of [-4 0 4]
-  set heading 90
-  set speed 0.1 + random 9.9
-  set speed-limit (((random 11) / 10) + 1)
-  set global-speed-limit 0.5
-  set ticks-since-switch 0
-  set max-wait-ticks (random 20)
+  set color (random 140)                     ;; Give each car random color
+  setxy random-xcor one-of [-4 0 4]          ;; Give each car xcor -4, 0 or 4 for different lanes
+  set heading 90                             ;; Heading is 90, to the right
+  set speed 0.1 + random 9.9                 ;; Initial speed for all cars is set to 0.1 plus a random number to make sure not all cars are driving the same speed
+  set speed-limit (((random 11) / 10) + 1)   ;; Set speed limit for a car
+  set global-speed-limit 0.5                 ;; Global speed limit for all cars (disabled by default)
+  set ticks-since-switch 0                   ;; Reset counter for ticks since last lane switch
+  set max-wait-ticks (random 20)             ;; Number of ticks a car waits before it chooses a better lane is a random number up to 20
 
   ;; all boolean values must have an initual value, set to false in setup
   set change? false
@@ -78,8 +79,7 @@ to setup-cars
   set car-in-front-left? false
   set car-in-front-right? false
 
-  ;; make sure no two cars are on the same patch
-  loop [ ifelse any? other turtles-here [ fd 1 ] [ stop ] ]
+  loop [ ifelse any? other turtles-here [ fd 1 ] [ stop ] ] ;; Make sure no two cars are on the same patch
 end
 
 
@@ -88,10 +88,8 @@ end
 
 to drive
   ask turtles [
-    ;; vehicle surroundings are checked
-    look-ahead
-    ;;adjust speed
-    adjust-speed
+    look-ahead      ;; vehicle surroundings are checked
+    adjust-speed    ;; adjust speed
   ]
   ; Now that all speeds are adjusted, give turtles a chance to change lanes
   calculate-lane-densities
@@ -102,12 +100,12 @@ to drive
     ;; vehicle surroundings are checked again
     look-around
     ;; decide what action should be performed based on whether or not a lane is closed
-    ifelse closed-lane? and not has-switched? [ perform-closed-lane-actions ] [ perform-normal-situation-actions ]
-    if ticks-since-switch > max-wait-ticks + 40 [
+    ifelse closed-lane? and not has-switched? [ perform-closed-lane-actions ] [ perform-normal-situation-actions ] ;; if a lane has been closed and the car has not reacted to that yet, react to it. else, perform normal actions
+    if ticks-since-switch > max-wait-ticks + 40 [ ;; every max-wait-ticks (depends on car) + 40 ticks, a car chooses the best lane it can be in
       choose-best-lane
       set ticks-since-switch 0
     ]
-    set ticks-since-switch (ticks-since-switch + 1)
+    set ticks-since-switch (ticks-since-switch + 1) ;; increase ticks since switch with 1
     jump speed
   ]
   tick
@@ -120,10 +118,10 @@ end
 to perform-normal-situation-actions
   ;; Control for making sure no one crashes.
   ifelse (car-in-front?) and (xcor != min-pxcor - .5) [
-    set speed [speed] of (one-of turtles-at 1 0)
+    set speed [speed] of (one-of turtles-at 1 0)           ;; if a car is directly in front of current car, set speed of current car to speed of car in front
   ]
   [
-    if ((any? turtles-at 2 0) and (speed > 1.0)) [
+    if ((any? turtles-at 2 0) and (speed > 1.0)) [         ;; if no car is directly in front, but there is a car 2 patches away and speed is already > 1, set speed of current car to speed of car in front
       set speed ([speed] of (one-of turtles-at 2 0))
       fd 1
     ]
@@ -132,44 +130,39 @@ end
 
 to perform-closed-lane-actions
   if ycor = closed-lane [
-    move-out-of-closed-lane
-    if ycor != closed-lane [ set has-switched? true ]
+    move-out-of-closed-lane                                ;; if the lane the car is on is closed, move out of the lane
+    if ycor != closed-lane [ set has-switched? true ]      ;; car has switched
     stop
   ]
   if ycor = 0 [
-    make-room-for-merging-cars
-    set has-switched? true
+    make-room-for-merging-cars                             ;; the closed lane is always one of the outer lanes. Therefore, cars in the middle lane should make room for merging cars from the closed lane
+    set has-switched? true                                 ;; car has switched
     stop
   ]
-  if ycor = closed-lane - 8 or ycor = closed-lane + 8 [
+  if ycor = closed-lane - 8 or ycor = closed-lane + 8 [    ;; if the car is already on the lane farthest from the closed lane, do nothing
     set has-switched? true
   ]
 end
 
 to choose-best-lane
   ;; switch lanes based on whether or not the density on another lane is lower
-  if ycor = -4 and middle-lane-density < right-lane-density and not car-in-front-left? [
+  if ycor = -4 and middle-lane-density < right-lane-density and not car-in-front-left? [                               ;; if on right lane and middle lane is less busy and than current lane, move left
     move-left
     stop
   ]
-  if ycor = 4 and middle-lane-density < left-lane-density and not car-in-front-right? [
+  if ycor = 4 and middle-lane-density < left-lane-density and not car-in-front-right? [                                ;; if on left lane and middle lane is less busy and than current lane, move right
     move-right
     stop
   ]
-  if ycor = 0 and left-lane-density < middle-lane-density and not car-in-front-left? and (not (closed-lane = 4)) [
+  if ycor = 0 and left-lane-density < middle-lane-density and not car-in-front-left? and (not (closed-lane = 4)) [     ;; if on middle lane and left lane is less busy and than current lane, move left
     move-left
     stop
   ]
-  if ycor = 0 and right-lane-density < middle-lane-density and not car-in-front-right? and (not (closed-lane = -4)) [
+  if ycor = 0 and right-lane-density < middle-lane-density and not car-in-front-right? and (not (closed-lane = -4)) [  ;; if on middle lane and right lane is less busy and than current lane, move right
     move-right
     stop
   ]
 end
-
-to signal
-  ifelse (any? turtles-at 1 0) [ if ([speed] of (one-of (turtles-at 1 0))) < (speed) [ set change? true ] ] [ set change? false ]
-end
-
 
 
 ;; VEHICLE PROCEDURES - MOVING
@@ -337,6 +330,7 @@ end
 to calculate-lane-densities
   reset-lane-densities
   ask turtles [
+    ;; For each car on a lane, the density of that lane is increased by 1
     if ycor = 4 [ set left-lane-density (left-lane-density + 1) ]
     if ycor = 0 [ set middle-lane-density (middle-lane-density + 1) ]
     if ycor = -4 [ set right-lane-density (right-lane-density + 1) ]
@@ -368,10 +362,10 @@ end
 GRAPHICS-WINDOW
 271
 21
-821
-274
-25
-10
+819
+252
+-1
+-1
 10.6
 1
 10
@@ -463,7 +457,7 @@ number
 number
 0
 134
-80
+80.0
 1
 1
 NIL
@@ -478,7 +472,7 @@ slow-down
 slow-down
 0
 100
-78
+78.0
 1
 1
 NIL
@@ -493,7 +487,7 @@ speed-up
 speed-up
 0
 100
-38
+38.0
 1
 1
 NIL
@@ -977,9 +971,8 @@ false
 0
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
-
 @#$#@#$#@
-NetLogo 5.2.1
+NetLogo 6.0.1
 @#$#@#$#@
 setup
 repeat 50 [ drive ]
@@ -997,7 +990,6 @@ true
 0
 Line -7500403 true 150 150 90 180
 Line -7500403 true 150 150 210 180
-
 @#$#@#$#@
 0
 @#$#@#$#@
