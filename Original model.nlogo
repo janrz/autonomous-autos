@@ -16,7 +16,7 @@ turtles-own            ;; These variables all apply to only one car
   speed                ;; the current speed of the car
   speed-limit          ;; the maximum speed of the car (different for all cars)
   global-speed-limit   ;; the maximum speed allowed when a lane is closed (if enabled)
-  change?              ;; true if the car wants to change lanes
+  change?              ;; true if the car wants to change lanes (appears to be unused)
   open-lane-left?      ;; true if there is an open lane left of the vehicle
   open-lane-right?     ;; true if there is an open lane right of the vehicle
   left-moving?         ;; true if the cars in the lane left of the car are moving
@@ -231,10 +231,12 @@ to adjust-speed
   [
     accelerate
   ]
-  ;; Vehicles will keep moving
+  ;; Keeps vehicles moving
   if (speed < 0.01) [ set speed 0.01 ]
+
   ;; If vehicles exceed the speed limit, their speed is set to the speed limit
   if (speed > speed-limit) [ set speed speed-limit ]
+
   ;; If the global speed limit is enabled, vehicles will maintain an adjusted maximum speed when a lane is closed, to make more room for merging cars
   if (global-speed-limit?) and (closed-lane?) and (speed > global-speed-limit) [ set speed global-speed-limit ]
 end
@@ -263,7 +265,7 @@ to check-open-lane-right
   ifelse ((ycor - 4 < -4) or (ycor - 4 = closed-lane)) [ set open-lane-right? false ] [ set open-lane-right? true ]
 end
 
-;; determine presence of surrounding vehicles
+;; determine presence of surrounding vehicles by checking relevant surrounding patches
 to look-around
   look-ahead
   look-left
@@ -273,23 +275,23 @@ to look-around
 end
 
 to look-ahead
-  ifelse (any? turtles-at 1 0) [ set car-in-front? true ] [ set car-in-front? false]
+  ifelse (any? turtles-at 1 0) [ set car-in-front? true ] [ set car-in-front? false]             ;; check if any cars are directly in front of the current car and set the corresponding boolean variable of the car
 end
 
 to look-left
-  ifelse (any? turtles-at 0 4) [ set car-to-side-left? true ] [ set car-to-side-left? false]
+  ifelse (any? turtles-at 0 4) [ set car-to-side-left? true ] [ set car-to-side-left? false]     ;; check if any cars are directly to the left of the current car and set the corresponding boolean variable of the car
 end
 
 to look-right
-  ifelse (any? turtles-at 0 -4) [ set car-to-side-right? true ] [ set car-to-side-right? false]
+  ifelse (any? turtles-at 0 -4) [ set car-to-side-right? true ] [ set car-to-side-right? false]  ;; check if any cars are directly to the right of the current car and set the corresponding boolean variable of the car
 end
 
 to look-front-left
-  ifelse (any? turtles-at 1 4) [ set car-in-front-left? true ] [ set car-in-front-left? false]
+  ifelse (any? turtles-at 1 4) [ set car-in-front-left? true ] [ set car-in-front-left? false]   ;; check if any cars are in the left front of the current car and set the corresponding boolean variable of the car
 end
 
 to look-front-right
-  ifelse (any? turtles-at 1 -4) [ set car-in-front-right? true ] [ set car-in-front-right? false]
+  ifelse (any? turtles-at 1 -4) [ set car-in-front-right? true ] [ set car-in-front-right? false];; check if any cars are in the right front of the current car and set the corresponding boolean variable of the car
 end
 
 
@@ -298,14 +300,14 @@ end
 
 ;; close one of outer lanes
 to close-lane
-  if not closed-lane? [
-    set closed-lane one-of [-4 4]
+  if not closed-lane? [                                          ;; check if no lane has been closed already
+    set closed-lane one-of [-4 4]                                ;; pick random lane to be closed, either left or right lane
     ask patches
     [ ifelse (closed-lane = -4)
-      [ if ((pycor > -6) and (pycor < -2)) [ set pcolor red ]]
-      [ if ((pycor < 6) and (pycor > 2)) [ set pcolor red ]]
+      [ if ((pycor > -6) and (pycor < -2)) [ set pcolor red ]]   ;; if closed-lane has ycor -4, e.g. the right lane should be closed, colour that lane red
+      [ if ((pycor < 6) and (pycor > 2)) [ set pcolor red ]]     ;; else, closed-lane must have ycor 4 e.g. left lane should be closed, colour that lane red
     ]
-    set closed-lane? true
+    set closed-lane? true                                        ;; global variable closed-lane? is set to true to indicate a lane is closed
   ]
 end
 
@@ -314,13 +316,13 @@ to re-open-lane
   if closed-lane? [
     ask patches
     [ ifelse (closed-lane = -4)
-      [ if ((pycor > -6) and (pycor < -2)) [ set pcolor gray ]]
-      [ if ((pycor < 6) and (pycor > 2)) [ set pcolor gray ]]
+      [ if ((pycor > -6) and (pycor < -2)) [ set pcolor gray ]] ;; if closed-lane has ycor -4, e.g. the right lane is closed, colour that lane gray again
+      [ if ((pycor < 6) and (pycor > 2)) [ set pcolor gray ]]   ;; else, closed-lane must have ycor 4 e.g. left lane is closed, colour that lane gray again
     ]
-    set closed-lane? false
-    set closed-lane -10
+    set closed-lane? false                                      ;; global variable closed-lane? is set to false to indicate no lane is closed
+    set closed-lane -10                                         ;; closed-lane is set to -10, which is a beyond the range of the model so it will not interfere with anything
   ]
-  ask turtles [ set has-switched? false ]
+  ask turtles [ set has-switched? false ]                       ;; for all cars that have switched lanes after the lane was closed, the has-switched? property should be reset
 end
 
 
