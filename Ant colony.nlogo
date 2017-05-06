@@ -471,7 +471,7 @@ MONITOR
 384
 511
 average speed
-mean [speed] of turtles
+mean [speed] of cars
 2
 1
 11
@@ -485,7 +485,7 @@ number
 number
 0
 134
-3.0
+60.0
 1
 1
 NIL
@@ -500,7 +500,7 @@ slow-down
 slow-down
 0
 100
-78.0
+76.0
 1
 1
 NIL
