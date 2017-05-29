@@ -485,7 +485,7 @@ number
 number
 0
 134
-60.0
+30.0
 1
 1
 NIL
@@ -535,11 +535,11 @@ Speed
 2.5
 true
 true
-"set-plot-y-range 0 ((max [speed-limit] of turtles) + .5)" ""
+"set-plot-y-range 0 ((max [speed-limit] of cars) + .5)" ""
 PENS
-"average" 1.0 0 -10899396 true "" "plot mean [speed] of turtles"
-"max" 1.0 0 -11221820 true "" "plot max [speed] of turtles"
-"min" 1.0 0 -13345367 true "" "plot min [speed] of turtles"
+"average" 1.0 0 -10899396 true "" "plot mean [speed] of cars"
+"max" 1.0 0 -11221820 true "" "plot max [speed] of cars"
+"min" 1.0 0 -13345367 true "" "plot min [speed] of cars"
 "selected-car" 1.0 0 -2674135 true "" "plot [speed] of selected-car"
 
 BUTTON
@@ -575,17 +575,6 @@ NIL
 NIL
 NIL
 1
-
-SWITCH
-5
-347
-195
-380
-global-speed-limit?
-global-speed-limit?
-1
-1
--1000
 
 BUTTON
 999
@@ -630,6 +619,17 @@ Test area for model development
 11
 0.0
 1
+
+SWITCH
+5
+347
+195
+380
+global-speed-limit?
+global-speed-limit?
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
