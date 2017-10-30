@@ -1,55 +1,49 @@
+extensions [table]
+
 ;; SETUP
 
-breed [cars car]
-breed [traces trace]
-
-globals
+turtles-own            ;; These variables all apply to only one car
 [
-  closed-lane          ;; the closed lane
-  closed-lane?         ;; true if a lane is closed
-]
+  ;; Variables that other cars have access to
+  current-speed        ;; the current speed of the car
+                       ;; xcor is included
+                       ;; ycor is included by default
+  desired-speed        ;; the speed the car wants to change to
+  desired-lane         ;; the lane the car wants to change to
+  car-information      ;; list of above information [ current-speed xcor ycor desired-speed desired-lane ]
 
-cars-own               ;; These variables all apply to only one car
-[
-  speed                ;; the current speed of the car
+  ;; information about surrounding cars: current-speed, relative xcor and ycor, and its intention(speed difference and lane)
+  car-left             ;; information about car to the left
+  car-front-left       ;; information about car to the front left
+  car-front            ;; information about car in front
+  car-front-right      ;; information about car to the front right
+  car-right            ;; information about car to the right
+
+  ;; other information
   speed-limit          ;; the maximum speed of the car (different for all cars)
   global-speed-limit   ;; the maximum speed allowed when a lane is closed (if enabled)
-  change?              ;; true if the car wants to change lanes (appears to be unused)
-  open-lane-left?      ;; true if there is an open lane left of the vehicle
-  open-lane-right?     ;; true if there is an open lane right of the vehicle
-  left-moving?         ;; true if the cars in the lane left of the car are moving
-  right-moving?        ;; true if the cars in the lane right of the car are moving
   has-switched?        ;; true if the car has switched lanes after a lane was closed
   ticks-since-switch   ;; number of ticks since car switched lanes: a car can only change lanes again after a number of ticks to make them less nervous and more realistic
   max-wait-ticks       ;; random number that dictates how long a car waits before it chooses a better lane
   current-position     ;; saves current position to compare to later position
-
-  ;; surrounding cars. for all variables: true if a car is present at the indicated position
-  car-to-side-left?
-  car-to-side-right?
-  car-in-front?
-  car-in-front-left?
-  car-in-front-right?
 ]
 
-traces-own
-[
-  strength             ;; current strength of an individual trace
-]
+to create-table
+  let dict table:make
+  table:put dict "test1" "test2"
+  print dict
+end
 
 to setup
   clear-all                            ;; clear area
-  draw-environment                     ;; draw road and surroundings
-  set-default-shape cars "car"         ;; give cars their shape
-  set-default-shape traces "dot"
-  create-cars number [ setup-cars ] ;; create cars
+  draw-road                            ;; draw road and surroundings
+  set-default-shape turtles "car"      ;; give cars their shape
+  create-turtles number [ setup-cars ] ;; create cars
   reset-ticks
-  set closed-lane? false
-  set closed-lane -10
 end
 
 ;; Function to draw road and surroundings
-to draw-environment
+to draw-road
   ask patches [
     set pcolor green                                                  ;; Color all patches green for grass
     if ((pycor > -6) and (pycor < 6)) [ set pcolor gray ]             ;; Color patches with -6 < ycor < 6 gray for road
@@ -63,306 +57,59 @@ to setup-cars
   set color (random 140)                     ;; Give each car random color
   setxy random-xcor one-of [-4 0 4]          ;; Give each car xcor -4, 0 or 4 for different lanes
   set heading 90                             ;; Heading is 90, to the right
-  set speed 0.1 + random 9.9                 ;; Initial speed for all cars is set to 0.1 plus a random number to make sure not all cars are driving the same speed
+  set current-speed 0.1 + random 9.9         ;; Initial speed for all cars is set to 0.1 plus a random number to make sure not all cars are driving the same speed
   set speed-limit (((random 11) / 10) + 1)   ;; Set speed limit for a car
   set global-speed-limit 0.5                 ;; Global speed limit for all cars (disabled by default)
   set ticks-since-switch 0                   ;; Reset counter for ticks since last lane switch
   set max-wait-ticks (random 20)             ;; Number of ticks a car waits before it chooses a better lane is a random number up to 20
+  ;; TODO set initial information list/array
 
   ;; all boolean values must have an initual value, set to false in setup
-  set change? false
-  set open-lane-left? false
-  set open-lane-right? false
-  set left-moving? false
-  set right-moving? false
   set has-switched? false
 
-  set car-to-side-left? false
-  set car-to-side-right? false
-  set car-in-front? false
-  set car-in-front-left? false
-  set car-in-front-right? false
-
-  loop [ ifelse any? other cars-here [ fd 1 ] [ stop ] ] ;; Make sure no two cars are on the same patch
+  loop [ ifelse any? other turtles-here [ fd 1 ] [ stop ] ] ;; Make sure no two cars are on the same patch
 end
 
-;; DRIVING LOOP
-
+;; DRIVING LOOP, ADJUSTED TO NEW MESSAGE PASSING
 to drive
-  ask cars [
-    look-ahead      ;; vehicle surroundings are checked
-    adjust-speed    ;; adjust speed
+  ask turtles [
+    check-surroundings        ;; car checks surroundings: speed, position and intention of other cars
+    make-decision             ;; car makes decision on speed and lane: change or keep the same
+    move                      ;; car acts based on decision
+    update-own-information    ;; car updates public information
   ]
-  ; Now that all speeds are adjusted, give cars a chance to change lanes
-
-  ask cars [
-
-    ;; vehicle surroundings are checked again
-    look-around
-    ;; decide what action should be performed based on whether or not a lane is closed
-    ifelse closed-lane? and not has-switched? [ perform-closed-lane-actions ] [ perform-normal-situation-actions ] ;; if a lane has been closed and the car has not reacted to that yet, react to it. else, perform normal actions
-
-    if ticks-since-switch > max-wait-ticks + 40 [ ;; every max-wait-ticks (depends on car) + 40 ticks, a car chooses the best lane it can be in
-      choose-best-lane
-      set ticks-since-switch 0
-    ]
-    set ticks-since-switch (ticks-since-switch + 1) ;; increase ticks since switch with 1
-    jump speed
-    hatch-traces 1 [ leave-trace ]
-  ]
-
-  fade-traces
-
-  ;; TODO count total of trace strengths on each patch
-  ask patches [
-
-  ]
-
   tick
 end
 
-to leave-trace
-  set color red
-  set strength 100
+;; VEHICLE PROCEDURES - CHECK SURROUNDINGS
+to check-surroundings
+  ifelse (any? turtles-at 0 4) [ set car-left [car-information] of (one-of turtles-at 0 4)] [ set car-left false]                 ;; check if any cars are directly to the left of the current car and set the corresponding boolean variable of the car
+  ifelse (any? turtles-at 1 4) [ set car-front-left [car-information] of (one-of turtles-at 1 4)] [ set car-front-left false]     ;; check if any cars are directly to the left of the current car and set the corresponding boolean variable of the car
+  ifelse (any? turtles-at 1 0) [ set car-front [car-information] of (one-of turtles-at 1 0)] [ set car-front false]               ;; check if any cars are directly to the left of the current car and set the corresponding boolean variable of the car
+  ifelse (any? turtles-at 1 -4) [ set car-front-right [car-information] of (one-of turtles-at 1 -4)] [ set car-front-right false] ;; check if any cars are directly to the left of the current car and set the corresponding boolean variable of the car
+  ifelse (any? turtles-at 0 -4) [ set car-right [car-information] of (one-of turtles-at 0 -4)] [ set car-right false]             ;; check if any cars are directly to the left of the current car and set the corresponding boolean variable of the car
 end
 
-;; VEHICLE PROCEDURES - MAKING DECISIONS
-
-to perform-normal-situation-actions
-  ;; Control for making sure no one crashes.
-  ifelse (car-in-front?) and (xcor != min-pxcor - .5) [
-    set speed [speed] of (one-of cars-at 1 0)           ;; if a car is directly in front of current car, set speed of current car to speed of car in front
-  ]
-  [
-    if ((any? cars-at 2 0) and (speed > 1.0)) [         ;; if no car is directly in front, but there is a car 2 patches away and speed is already > 1, set speed of current car to speed of car in front
-      set speed ([speed] of (one-of cars-at 2 0))
-      fd 1
-    ]
-  ]
+;; VEHICLE PROCEDURES - MAKE DECISION
+to make-decision
 end
 
-to perform-closed-lane-actions
-  if ycor = closed-lane [
-    move-out-of-closed-lane                                ;; if the lane the car is on is closed, move out of the lane
-    if ycor != closed-lane [ set has-switched? true ]      ;; car has switched
-    stop
-  ]
-  if ycor = 0 [
-    make-room-for-merging-cars                             ;; the closed lane is always one of the outer lanes. Therefore, cars in the middle lane should make room for merging cars from the closed lane
-    set has-switched? true                                 ;; car has switched
-    stop
-  ]
-  if ycor = closed-lane - 8 or ycor = closed-lane + 8 [    ;; if the car is already on the lane farthest from the closed lane, do nothing
-    set has-switched? true
-  ]
+;; VEHICLE PROCEDURES - MOVE
+to move
+  jump current-speed
 end
 
-to choose-best-lane
-  ;; switch lanes based on whether or not the density on another lane is lower
-  if ycor = -4 and middle-lane-density < right-lane-density and not car-in-front-left? [                               ;; if on right lane and middle lane is less busy and than current lane, move left
-    move-left
-    stop
-  ]
-  if ycor = 4 and middle-lane-density < left-lane-density and not car-in-front-right? [                                ;; if on left lane and middle lane is less busy and than current lane, move right
-    move-right
-    stop
-  ]
-  if ycor = 0 and left-lane-density < middle-lane-density and not car-in-front-left? and (not (closed-lane = 4)) [     ;; if on middle lane and left lane is less busy and than current lane, move left
-    move-left
-    stop
-  ]
-  if ycor = 0 and right-lane-density < middle-lane-density and not car-in-front-right? and (not (closed-lane = -4)) [  ;; if on middle lane and right lane is less busy and than current lane, move right
-    move-right
-    stop
-  ]
+;; VEHICLE PROCEDURES - UPDATE OWN INFORMATION
+to update-own-information
+  ;; TODO list apparently does not accept variables, needs literal values, consider arrays instead of lists
+  ;;set car-information [current-speed xcor ycor desired-speed desired-lane] ;; Car information to be broadcast to others
 end
 
-
-;; VEHICLE PROCEDURES - MOVING
-
-;; increase speed of cars
-to accelerate  ;; car procedure
-  set speed (speed + (speed-up / 1000))
-end
-
-;; reduce speed of cars
-to decelerate  ;; car procedure
-  set speed (speed - (slow-down / 1000))
-end
-
-;; move the vehicle to the lane left of the current lane
-to move-left
-  ;; check if there are no cars directly to the left and if car is not already in left outer lane
-  look-left
-  if (not car-to-side-left?) and (ycor + 4 <= 4) and (ycor + 4 != closed-lane) [ set ycor (ycor + 4) ]
-end
-
-;; move the vehicle to the lane right of the current lane
-to move-right
-  ;; check if there are no cars directly to the right and if car is not already in right outer lane
-  look-right
-  if (not car-to-side-right?) and (ycor - 4 >= -4) and (ycor - 4 != closed-lane) [ set ycor (ycor - 4) ]
-end
-
-;; move the vehicle to the lane right of the current lane and move one step forward
-to move-front-right
-  look-front-right
-  if (not car-to-side-right?) and (ycor - 4 >= -4) and (ycor - 4 != closed-lane) [
-    set xcor (xcor + 1)
-    set ycor (ycor - 4)
-  ]
-end
-
-;; move the vehicle to the lane left of the current lane and move one step forward
-to move-front-left
-  look-front-left
-  if (not car-to-side-left?) and (ycor + 4 <= 4) and (ycor + 4 != closed-lane) [
-    set xcor (xcor + 1)
-    set ycor (ycor + 4)
-  ]
-end
-
-;; moves car in closed lane out of it
-to move-out-of-closed-lane
-  set current-position (ycor)
-  ifelse ycor = 4 [ move-front-right ] [ move-front-left ]
-  if ycor = current-position [ jump speed ]
-end
-
-to make-room-for-merging-cars
-  ifelse ycor = closed-lane - 4 [ move-right ] [ move-left ]
-end
-
-to adjust-speed
-  ;; All cars look first to see if there is a car directly in front of it,
-  ;; if so, set own speed to front car's speed and decelerate. If no front
-  ;; cars are found, accelerate towards speed-limit
-  ifelse (car-in-front?) [
-    set speed ([speed] of (one-of (cars-at 1 0)))
-    decelerate
-  ]
-  [
-    accelerate
-  ]
-  ;; Keeps vehicles moving
-  if (speed < 0.01) [ set speed 0.01 ]
-
-  ;; If vehicles exceed the speed limit, their speed is set to the speed limit
-  if (speed > speed-limit) [ set speed speed-limit ]
-
-  ;; If the global speed limit is enabled, vehicles will maintain an adjusted maximum speed when a lane is closed, to make more room for merging cars
-  if (global-speed-limit?) and (closed-lane?) and (speed > global-speed-limit) [ set speed global-speed-limit ]
-end
-
-
-;; VEHICLE PROCEDURES - CHECKING SURROUNDINGS
-
-;; check if vehicles in lane right of vehicle are moving
-to check-left-moving
-  ifelse (([speed] of one-of (cars-at 1 4)) > 0.01) or (not any? cars-at 1 4) [ set left-moving? true ] [ set left-moving? false ]
-end
-
-;; check if vehicles in lane left of vehicle are moving
-to check-right-moving
-  ifelse (([speed] of one-of (cars-at 1 -4)) > 0.01) or (not any? cars-at 1 -4) [ set right-moving? true ] [ set right-moving? false ]
-end
-
-;; check lanes the vehicle can go to
-;; example: if lane left of vehicle is closed or if vehicle is already in outer left lane, it cannot move left
-to check-open-lane-left
-  ifelse ((ycor + 4 > 4) or (ycor + 4 = closed-lane)) [ set open-lane-left? false ] [ set open-lane-left? true ]
-end
-
-to check-open-lane-right
-  ifelse ((ycor - 4 < -4) or (ycor - 4 = closed-lane)) [ set open-lane-right? false ] [ set open-lane-right? true ]
-end
-
-;; determine presence of surrounding vehicles by checking relevant surrounding patches
-to look-around
-  look-ahead
-  look-left
-  look-right
-  look-front-left
-  look-front-right
-end
-
-to look-ahead
-  ifelse (any? cars-at 1 0) [ set car-in-front? true ] [ set car-in-front? false]             ;; check if any cars are directly in front of the current car and set the corresponding boolean variable of the car
-end
-
-to look-left
-  ifelse (any? cars-at 0 4) [ set car-to-side-left? true ] [ set car-to-side-left? false]     ;; check if any cars are directly to the left of the current car and set the corresponding boolean variable of the car
-end
-
-to look-right
-  ifelse (any? cars-at 0 -4) [ set car-to-side-right? true ] [ set car-to-side-right? false]  ;; check if any cars are directly to the right of the current car and set the corresponding boolean variable of the car
-end
-
-to look-front-left
-  ifelse (any? cars-at 1 4) [ set car-in-front-left? true ] [ set car-in-front-left? false]   ;; check if any cars are in the left front of the current car and set the corresponding boolean variable of the car
-end
-
-to look-front-right
-  ifelse (any? cars-at 1 -4) [ set car-in-front-right? true ] [ set car-in-front-right? false];; check if any cars are in the right front of the current car and set the corresponding boolean variable of the car
-end
-
-
-;; PROCEDURES FOR CLOSING/OPENING LANES
-
-;; close one of outer lanes
-to close-lane
-  if not closed-lane? [                                          ;; check if no lane has been closed already
-    set closed-lane one-of [-4 4]                                ;; pick random lane to be closed, either left or right lane
-    ask patches
-    [ ifelse (closed-lane = -4)
-      [ if ((pycor > -6) and (pycor < -2)) [ set pcolor red ]]   ;; if closed-lane has ycor -4, e.g. the right lane should be closed, colour that lane red
-      [ if ((pycor < 6) and (pycor > 2)) [ set pcolor red ]]     ;; else, closed-lane must have ycor 4 e.g. left lane should be closed, colour that lane red
-    ]
-    set closed-lane? true                                        ;; global variable closed-lane? is set to true to indicate a lane is closed
-  ]
-end
-
-;; re-open closed lane
-to re-open-lane
-  if closed-lane? [
-    ask patches
-    [ ifelse (closed-lane = -4)
-      [ if ((pycor > -6) and (pycor < -2)) [ set pcolor gray ]] ;; if closed-lane has ycor -4, e.g. the right lane is closed, colour that lane gray again
-      [ if ((pycor < 6) and (pycor > 2)) [ set pcolor gray ]]   ;; else, closed-lane must have ycor 4 e.g. left lane is closed, colour that lane gray again
-    ]
-    set closed-lane? false                                      ;; global variable closed-lane? is set to false to indicate no lane is closed
-    set closed-lane -10                                         ;; closed-lane is set to -10, which is a beyond the range of the model so it will not interfere with anything
-  ]
-  ask cars [ set has-switched? false ]                       ;; for all cars that have switched lanes after the lane was closed, the has-switched? property should be reset
-end
-
-
-;; TRACES
-
-to fade-traces
-  ask traces [
-    set strength (strength - 5)
-    if strength = 0 [ die ]
-    if strength < 50 [ set color orange ]
-    if strength < 25 [ set color yellow ]
-    if strength < 10 [ set color green ]
-  ]
-end
-
-;; TEST AREA FOR MODEL DEVELOPMENT
-
-to move-all-right
-  ask cars [ move-right ]
-end
-
-to move-all-left
-  ask cars [ move-left ]
-end
 
 ; Copyright 1998 Uri Wilensky (original model).
 ; See Info tab for full copyright and license.
 ; Edited 2016 by Jan Rezelman and Nousha van Dijk for the Collective Intelligence course at VU University, Amsterdam
-; Edited 2017 by Jan Rezelman for Bachelor of Science project at VU University, Amsterdam
+; Edited 2017 by Jan Rezelman for Bachelor Project
 @#$#@#$#@
 GRAPHICS-WINDOW
 271
@@ -448,7 +195,7 @@ MONITOR
 384
 511
 average speed
-mean [speed] of cars
+mean [current-speed] of turtles
 2
 1
 11
@@ -462,7 +209,7 @@ number
 number
 0
 134
-30.0
+80.0
 1
 1
 NIL
@@ -477,7 +224,7 @@ slow-down
 slow-down
 0
 100
-76.0
+78.0
 1
 1
 NIL
@@ -512,90 +259,12 @@ Speed
 2.5
 true
 true
-"set-plot-y-range 0 ((max [speed-limit] of cars) + .5)" ""
+"set-plot-y-range 0 ((max [speed-limit] of turtles) + .5)" ""
 PENS
-"average" 1.0 0 -10899396 true "" "plot mean [speed] of cars"
-"max" 1.0 0 -11221820 true "" "plot max [speed] of cars"
-"min" 1.0 0 -13345367 true "" "plot min [speed] of cars"
-"selected-car" 1.0 0 -2674135 true "" "plot [speed] of selected-car"
-
-BUTTON
-5
-257
-110
-290
-close lane
-close-lane
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-3
-297
-127
-330
-re-open lane
-re-open-lane
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-999
-62
-1100
-95
-NIL
-move-all-left
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-999
-100
-1107
-133
-NIL
-move-all-right
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-TEXTBOX
-999
-31
-1149
-59
-Test area for model development
-11
-0.0
-1
+"average" 1.0 0 -10899396 true "" "plot mean [current-speed] of turtles"
+"max" 1.0 0 -11221820 true "" "plot max [current-speed] of turtles"
+"min" 1.0 0 -13345367 true "" "plot min [current-speed] of turtles"
+"selected-car" 1.0 0 -2674135 true "" "plot [current-speed] of selected-car"
 
 SWITCH
 5

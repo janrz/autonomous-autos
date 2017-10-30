@@ -1,2 +1,4 @@
 /ignore
 /literature
+*.tmp.nlogo
+*.tmp
