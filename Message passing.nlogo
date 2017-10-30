@@ -1,7 +1,13 @@
-extensions [table]
+extensions [table array]
 
 ;; SETUP
-
+globals [
+  current-speed-
+  xcor-
+  ycor-
+  desired-speed-
+  desired-lane-
+]
 turtles-own            ;; These variables all apply to only one car
 [
   ;; Variables that other cars have access to
@@ -10,7 +16,7 @@ turtles-own            ;; These variables all apply to only one car
                        ;; ycor is included by default
   desired-speed        ;; the speed the car wants to change to
   desired-lane         ;; the lane the car wants to change to
-  car-information      ;; list of above information [ current-speed xcor ycor desired-speed desired-lane ]
+  car-information      ;; table containing above information [ current-speed xcor ycor desired-speed desired-lane ]
 
   ;; information about surrounding cars: current-speed, relative xcor and ycor, and its intention(speed difference and lane)
   car-left             ;; information about car to the left
@@ -27,12 +33,6 @@ turtles-own            ;; These variables all apply to only one car
   max-wait-ticks       ;; random number that dictates how long a car waits before it chooses a better lane
   current-position     ;; saves current position to compare to later position
 ]
-
-to create-table
-  let dict table:make
-  table:put dict "test1" "test2"
-  print dict
-end
 
 to setup
   clear-all                            ;; clear area
@@ -101,8 +101,13 @@ end
 
 ;; VEHICLE PROCEDURES - UPDATE OWN INFORMATION
 to update-own-information
-  ;; TODO list apparently does not accept variables, needs literal values, consider arrays instead of lists
-  ;;set car-information [current-speed xcor ycor desired-speed desired-lane] ;; Car information to be broadcast to others
+  let car-info table:make
+  table:put car-info "current-speed" current-speed
+  table:put car-info "xcor" xcor
+  table:put car-info "ycor" ycor
+  table:put car-info "desired-speed" desired-speed
+  table:put car-info "desired-lane" desired-lane
+  set car-information car-info
 end
 
 
