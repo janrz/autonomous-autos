@@ -1,4 +1,4 @@
-extensions [table array]
+extensions [table]
 
 ;; SETUP
 turtles-own            ;; These variables all apply to only one car
@@ -17,11 +17,11 @@ turtles-own            ;; These variables all apply to only one car
   car-front            ;; information about car in front
   car-front-right      ;; information about car to the front right
   car-right            ;; information about car to the right
+  surrounding-cars     ;; table containing above information [ car-left car-front-left car-front car-front-right car-right ]
 
   ;; other information
   speed-limit          ;; the maximum speed of the car (different for all cars)
   global-speed-limit   ;; the maximum speed allowed when a lane is closed (if enabled)
-  has-switched?        ;; true if the car has switched lanes after a lane was closed
   ticks-since-switch   ;; number of ticks since car switched lanes: a car can only change lanes again after a number of ticks to make them less nervous and more realistic
   max-wait-ticks       ;; random number that dictates how long a car waits before it chooses a better lane
   current-position     ;; saves current position to compare to later position
@@ -47,27 +47,36 @@ to draw-road
 end
 
 to setup-cars
-  set color (random 140)                     ;; Give each car random color
-  setxy random-xcor one-of [-4 0 4]          ;; Give each car xcor -4, 0 or 4 for different lanes
-  set heading 90                             ;; Heading is 90, to the right
-  set current-speed 0.1 + random 9.9         ;; Initial speed for all cars is set to 0.1 plus a random number to make sure not all cars are driving the same speed
-  set speed-limit (((random 11) / 10) + 1)   ;; Set speed limit for a car
-  set global-speed-limit 0.5                 ;; Global speed limit for all cars (disabled by default)
-  set ticks-since-switch 0                   ;; Reset counter for ticks since last lane switch
-  set max-wait-ticks (random 20)             ;; Number of ticks a car waits before it chooses a better lane is a random number up to 20
-  ;; TODO set initial information list/array
+  set color (random 140)                                  ;; Give each car random color
+  setxy random-xcor one-of [-4 0 4]                       ;; Give each car xcor -4, 0 or 4 for different lanes
+  set heading 90                                          ;; Heading is 90, to the right
+  set current-speed 0.1 + random 9.9                      ;; Initial speed for all cars is set to 0.1 plus a random number to make sure not all cars are driving the same speed
+  set speed-limit (((random 11) / 10) + 1)                ;; Set speed limit for a car
+  set global-speed-limit 0.5                              ;; Global speed limit for all cars (disabled by default)
+  set ticks-since-switch 0                                ;; Reset counter for ticks since last lane switch
+  set max-wait-ticks (random 20)                          ;; Number of ticks a car waits before it chooses a better lane is a random number up to 20
 
-  ;; all boolean values must have an initual value, set to false in setup
-  set has-switched? false
+  ;; Put public variables in table car-information
+  set car-information table:make
+  table:put car-information "current-speed" current-speed
+  table:put car-information "xcor" xcor
+  table:put car-information "ycor" ycor
+  table:put car-information "desired-speed" false
+  table:put car-information "desired-lane" false
+
+  ;; Create table to be filled with surrounding cars data
+  set surrounding-cars table:make
 
   loop [ ifelse any? other turtles-here [ fd 1 ] [ stop ] ] ;; Make sure no two cars are on the same patch
 end
 
 ;; DRIVING LOOP, ADJUSTED TO NEW MESSAGE PASSING
 to drive
-  ask turtles [
+  ask turtles [               ;; first let all cars check surroundings and decide on action
     check-surroundings        ;; car checks surroundings: speed, position and intention of other cars
     make-decision             ;; car makes decision on speed and lane: change or keep the same
+  ]
+  ask turtles [               ;; then let all cars act upon decisions and update public information
     move                      ;; car acts based on decision
     update-own-information    ;; car updates public information
   ]
@@ -81,10 +90,18 @@ to check-surroundings
   ifelse (any? turtles-at 1 0) [ set car-front [car-information] of (one-of turtles-at 1 0)] [ set car-front false]               ;; check if any cars are directly to the left of the current car and set the corresponding boolean variable of the car
   ifelse (any? turtles-at 1 -4) [ set car-front-right [car-information] of (one-of turtles-at 1 -4)] [ set car-front-right false] ;; check if any cars are directly to the left of the current car and set the corresponding boolean variable of the car
   ifelse (any? turtles-at 0 -4) [ set car-right [car-information] of (one-of turtles-at 0 -4)] [ set car-right false]             ;; check if any cars are directly to the left of the current car and set the corresponding boolean variable of the car
+
+  ;; fill table surrounding-cars with tables car-information of surrounding cars
+  table:put surrounding-cars "car-left" car-left
+  table:put surrounding-cars "car-front-left" car-front-left
+  table:put surrounding-cars "car-front" car-front
+  table:put surrounding-cars "car-front-right" car-front-right
+  table:put surrounding-cars "car-right" car-right
 end
 
 ;; VEHICLE PROCEDURES - MAKE DECISION
 to make-decision
+
 end
 
 ;; VEHICLE PROCEDURES - MOVE
@@ -94,13 +111,11 @@ end
 
 ;; VEHICLE PROCEDURES - UPDATE OWN INFORMATION
 to update-own-information
-  let car-info table:make
-  table:put car-info "current-speed" current-speed
-  table:put car-info "xcor" xcor
-  table:put car-info "ycor" ycor
-  table:put car-info "desired-speed" desired-speed
-  table:put car-info "desired-lane" desired-lane
-  set car-information car-info
+  table:put car-information "current-speed" current-speed
+  table:put car-information "xcor" xcor
+  table:put car-information "ycor" ycor
+  table:put car-information "desired-speed" desired-speed
+  table:put car-information "desired-lane" desired-lane
 end
 
 ; Copyright 1998 Uri Wilensky (original model).
