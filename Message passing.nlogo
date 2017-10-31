@@ -1,13 +1,6 @@
 extensions [table array]
 
 ;; SETUP
-globals [
-  current-speed-
-  xcor-
-  ycor-
-  desired-speed-
-  desired-lane-
-]
 turtles-own            ;; These variables all apply to only one car
 [
   ;; Variables that other cars have access to
@@ -109,7 +102,6 @@ to update-own-information
   table:put car-info "desired-lane" desired-lane
   set car-information car-info
 end
-
 
 ; Copyright 1998 Uri Wilensky (original model).
 ; See Info tab for full copyright and license.
