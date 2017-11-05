@@ -162,7 +162,7 @@ NIL
 T
 OBSERVER
 NIL
-NIL
+S
 NIL
 NIL
 1
@@ -179,7 +179,7 @@ T
 T
 OBSERVER
 NIL
-NIL
+G
 NIL
 NIL
 1
@@ -196,7 +196,7 @@ NIL
 T
 OBSERVER
 NIL
-NIL
+1
 NIL
 NIL
 1
@@ -268,7 +268,7 @@ Speed
 0.0
 300.0
 0.0
-2.5
+1.5
 true
 true
 "set-plot-y-range 0 ((max [speed-limit] of turtles) + .5)" ""
