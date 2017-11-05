@@ -50,7 +50,7 @@ to setup-cars
   set color (random 140)                                  ;; Give each car random color
   setxy random-xcor one-of [-4 0 4]                       ;; Give each car xcor -4, 0 or 4 for different lanes
   set heading 90                                          ;; Heading is 90, to the right
-  set current-speed 0.1 + random 9.9                      ;; Initial speed for all cars is set to 0.1 plus a random number to make sure not all cars are driving the same speed
+  set current-speed ((100 + random-float 30) / 100)       ;; Initial speed for all cars is set to .5 plus a random number to make sure not all cars are driving the same speed
   set speed-limit (((random 11) / 10) + 1)                ;; Set speed limit for a car
   set global-speed-limit 0.5                              ;; Global speed limit for all cars (disabled by default)
   set ticks-since-switch 0                                ;; Reset counter for ticks since last lane switch
@@ -221,7 +221,7 @@ number
 number
 0
 134
-80.0
+134.0
 1
 1
 NIL
