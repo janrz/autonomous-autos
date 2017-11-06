@@ -1,7 +1,9 @@
 extensions [table]
 
 ;; SETUP
-turtles-own            ;; These variables all apply to only one car
+
+;; These variables all apply to only one car
+turtles-own
 [
   ;; Variables that other cars have access to
   current-speed        ;; the current speed of the car
@@ -9,22 +11,36 @@ turtles-own            ;; These variables all apply to only one car
                        ;; ycor is included by default
   desired-speed        ;; the speed the car wants to change to
   desired-lane         ;; the lane the car wants to change to
-  car-information      ;; table containing above information [ current-speed xcor ycor desired-speed desired-lane ]
 
-  ;; information about surrounding cars: current-speed, relative xcor and ycor, and its intention(speed difference and lane)
+  ;; table containing above information
+  ;; [ current-speed xcor ycor desired-speed desired-lane ]
+  car-information
+
+  ;; information about surrounding cars:
+  ;; current-speed, xcor and ycor, and their intentions (speed and lane)
   car-left             ;; information about car to the left
   car-front-left       ;; information about car to the front left
   car-front            ;; information about car in front
   car-front-right      ;; information about car to the front right
   car-right            ;; information about car to the right
-  surrounding-cars     ;; table containing above information [ car-left car-front-left car-front car-front-right car-right ]
+  ;; table containing above information
+  ;; [ car-left car-front-left car-front car-front-right car-right ]
+  surrounding-cars
 
+  ;; TODO: comes from old model, will this be needed?
   ;; other information
-  speed-limit          ;; the maximum speed of the car (different for all cars)
-  global-speed-limit   ;; the maximum speed allowed when a lane is closed (if enabled)
-  ticks-since-switch   ;; number of ticks since car switched lanes: a car can only change lanes again after a number of ticks to make them less nervous and more realistic
-  max-wait-ticks       ;; random number that dictates how long a car waits before it chooses a better lane
-  current-position     ;; saves current position to compare to later position
+  ;; the maximum speed of the car (different for all cars)
+  speed-limit
+  ;; the maximum speed allowed when a lane is closed (if enabled)
+  global-speed-limit
+  ;; number of ticks since car switched lanes:
+  ;; a car can only change lanes again after a number of ticks
+  ;; to make them less nervous and more realistic
+  ticks-since-switch
+  ;; random number that dictates how long a car waits before it chooses a better lane
+  max-wait-ticks
+  ;; saves current position to compare to later position
+  current-position
 ]
 
 to setup
@@ -38,23 +54,38 @@ end
 ;; Function to draw road and surroundings
 to draw-road
   ask patches [
-    set pcolor green                                                  ;; Color all patches green for grass
-    if ((pycor > -6) and (pycor < 6)) [ set pcolor gray ]             ;; Color patches with -6 < ycor < 6 gray for road
-    if ((pycor = 2) and ((pxcor mod 3) = 2)) [ set pcolor white ]     ;; Color every third patch with ycor 2 or -2 white
-    if ((pycor = -2) and ((pxcor mod -3) = -2)) [ set pcolor white ]  ;;  for lane separators on road
-    if ((pycor = 6) or (pycor = -6)) [ set pcolor black ]             ;; Color patches with ycor 6 or -6 black for borders of road
+    ;; Color all patches green for grass
+    set pcolor green
+    ;; Color patches with -6 < ycor < 6 gray for road
+    if ((pycor > -6) and (pycor < 6)) [ set pcolor gray ]
+    ;; Color every third patch with ycor 2 or -2 white
+    ;; for lane separators on road
+    if ((pycor = 2) and ((pxcor mod 3) = 2)) [ set pcolor white ]
+    if ((pycor = -2) and ((pxcor mod -3) = -2)) [ set pcolor white ]
+    ;; Color patches with ycor 6 or -6 black for borders of road
+    if ((pycor = 6) or (pycor = -6)) [ set pcolor black ]
   ]
 end
 
 to setup-cars
-  set color (random 140)                                  ;; Give each car random color
-  setxy random-xcor one-of [-4 0 4]                       ;; Give each car xcor -4, 0 or 4 for different lanes
-  set heading 90                                          ;; Heading is 90, to the right
-  set current-speed ((100 + random-float 30) / 100)       ;; Initial speed for all cars is set to .5 plus a random number to make sure not all cars are driving the same speed
-  set speed-limit (((random 11) / 10) + 1)                ;; Set speed limit for a car
-  set global-speed-limit 0.5                              ;; Global speed limit for all cars (disabled by default)
-  set ticks-since-switch 0                                ;; Reset counter for ticks since last lane switch
-  set max-wait-ticks (random 20)                          ;; Number of ticks a car waits before it chooses a better lane is a random number up to 20
+  ;; Give each car random color
+  set color (random 140)
+  ;; Give each car xcor -4, 0 or 4 for different lanes
+  setxy random-xcor one-of [-4 0 4]
+  ;; Heading is 90, to the right
+  set heading 90
+  ;; Initial speed for all cars is set to .5 plus a random number
+  ;; to make sure not all cars are driving the same speed
+  set current-speed ((100 + random-float 30) / 100)
+  ;; Set speed limit for a car
+  set speed-limit (((random 11) / 10) + 1)
+  ;; Global speed limit for all cars (disabled by default)
+  set global-speed-limit 0.5
+  ;; Reset counter for ticks since last lane switch
+  set ticks-since-switch 0
+  ;; Number of ticks a car waits before it chooses a better lane
+  ;; is a random number up to 20
+  set max-wait-ticks (random 20)
 
   ;; Put public variables in table car-information
   set car-information table:make
@@ -67,29 +98,66 @@ to setup-cars
   ;; Create table to be filled with surrounding cars data
   set surrounding-cars table:make
 
-  loop [ ifelse any? other turtles-here [ fd 1 ] [ stop ] ] ;; Make sure no two cars are on the same patch
+  ;; Make sure no two cars are on the same patch
+  loop [ ifelse any? other turtles-here [ fd 1 ] [ stop ] ]
 end
 
 ;; DRIVING LOOP, ADJUSTED TO NEW MESSAGE PASSING
 to drive
-  ask turtles [               ;; first let all cars check surroundings and decide on action
-    check-surroundings        ;; car checks surroundings: speed, position and intention of other cars
-    make-decision             ;; car makes decision on speed and lane: change or keep the same
+  ;; first let all cars check surroundings and decide on action
+  ask turtles [
+    ;; car checks surroundings: speed, position and intention of other cars
+    check-surroundings
+    ;; car makes decision on speed and lane: change or keep the same
+    make-decision
   ]
-  ask turtles [               ;; then let all cars act upon decisions and update public information
-    move                      ;; car acts based on decision
-    update-own-information    ;; car updates public information
+  ;; then let all cars act upon decisions and update public information
+  ask turtles [
+    ;; car acts based on decision
+    move
+    ;; car updates public information
+    update-own-information
   ]
   tick
 end
 
 ;; VEHICLE PROCEDURES - CHECK SURROUNDINGS
 to check-surroundings
-  ifelse (any? turtles-at 0 4) [ set car-left [car-information] of (one-of turtles-at 0 4)] [ set car-left false]                 ;; check if any cars are directly to the left of the current car and set the corresponding boolean variable of the car
-  ifelse (any? turtles-at 1 4) [ set car-front-left [car-information] of (one-of turtles-at 1 4)] [ set car-front-left false]     ;; check if any cars are directly to the left of the current car and set the corresponding boolean variable of the car
-  ifelse (any? turtles-at 1 0) [ set car-front [car-information] of (one-of turtles-at 1 0)] [ set car-front false]               ;; check if any cars are directly to the left of the current car and set the corresponding boolean variable of the car
-  ifelse (any? turtles-at 1 -4) [ set car-front-right [car-information] of (one-of turtles-at 1 -4)] [ set car-front-right false] ;; check if any cars are directly to the left of the current car and set the corresponding boolean variable of the car
-  ifelse (any? turtles-at 0 -4) [ set car-right [car-information] of (one-of turtles-at 0 -4)] [ set car-right false]             ;; check if any cars are directly to the left of the current car and set the corresponding boolean variable of the car
+  ;; check if any cars are directly to the left of the current car and
+  ;; set the corresponding boolean variable of the car
+  ifelse (any? turtles-at 0 4) [
+    set car-left [car-information] of (one-of turtles-at 0 4)
+  ] [
+    set car-left false
+  ]
+  ;; check if any cars are directly to the left of the current car and
+  ;; set the corresponding boolean variable of the car
+  ifelse (any? turtles-at 1 4) [
+    set car-front-left [car-information] of (one-of turtles-at 1 4)
+  ] [
+    set car-front-left false
+  ]
+  ;; check if any cars are directly to the left of the current car and
+  ;; set the corresponding boolean variable of the car
+  ifelse (any? turtles-at 1 0) [
+    set car-front [car-information] of (one-of turtles-at 1 0)
+  ] [
+    set car-front false
+  ]
+  ;; check if any cars are directly to the left of the current car and
+  ;; set the corresponding boolean variable of the car
+  ifelse (any? turtles-at 1 -4) [
+    set car-front-right [car-information] of (one-of turtles-at 1 -4)
+  ] [
+    set car-front-right false
+  ]
+  ;; check if any cars are directly to the left of the current car and
+  ;; set the corresponding boolean variable of the car
+  ifelse (any? turtles-at 0 -4) [
+    set car-right [car-information] of (one-of turtles-at 0 -4)
+  ] [
+    set car-right false
+  ]
 
   ;; fill table surrounding-cars with tables car-information of surrounding cars
   table:put surrounding-cars "car-left" car-left
@@ -101,6 +169,8 @@ end
 
 ;; VEHICLE PROCEDURES - MAKE DECISION
 to make-decision
+  ;; INPUT: table surrounding-cars containing 5 tables:
+  ;; car-left, car-front-left, car-front, car-front-right, car-right
 
 end
 
@@ -120,7 +190,8 @@ end
 
 ; Copyright 1998 Uri Wilensky (original model).
 ; See Info tab for full copyright and license.
-; Edited 2016 by Jan Rezelman and Nousha van Dijk for the Collective Intelligence course at VU University, Amsterdam
+; Edited 2016 by Jan Rezelman and Nousha van Dijk
+; for the Collective Intelligence course at VU University, Amsterdam
 ; Edited 2017 by Jan Rezelman for Bachelor Project
 @#$#@#$#@
 GRAPHICS-WINDOW
