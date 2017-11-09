@@ -3,8 +3,7 @@ extensions [table]
 ;; SETUP
 
 ;; These variables all apply to only one car
-turtles-own
-[
+turtles-own [
   ;; Variables that other cars have access to
   current-speed        ;; the current speed of the car
                        ;; xcor is included
@@ -23,6 +22,7 @@ turtles-own
   car-front            ;; information about car in front
   car-front-right      ;; information about car to the front right
   car-right            ;; information about car to the right
+
   ;; table containing above information
   ;; [ car-left car-front-left car-front car-front-right car-right ]
   surrounding-cars
@@ -43,8 +43,38 @@ turtles-own
   current-position
 ]
 
+globals [
+  ;; Road information
+  road-y-min
+  road-y-max
+  road-color
+  road-border-color
+  road-lane-separator-color
+  road-lane-separator-1-ycor
+  road-lane-separator-2-ycor
+  road-lane-separator-1-x-distance
+  road-lane-separator-2-x-distance
+  road-background-color
+]
+
+;; CONSTANTS
+to set-constants
+  ;; Road information
+  set road-y-min -6
+  set road-y-max 6
+  set road-color gray
+  set road-border-color black
+  set road-lane-separator-color white
+  set road-lane-separator-1-ycor 2
+  set road-lane-separator-2-ycor -2
+  set road-lane-separator-1-x-distance 3
+  set road-lane-separator-2-x-distance -3
+  set road-background-color green
+end
+
 to setup
   clear-all                            ;; clear area
+  set-constants
   draw-road                            ;; draw road and surroundings
   set-default-shape turtles "car"      ;; give cars their shape
   create-turtles number [ setup-cars ] ;; create cars
@@ -54,16 +84,29 @@ end
 ;; Function to draw road and surroundings
 to draw-road
   ask patches [
-    ;; Color all patches green for grass
-    set pcolor green
-    ;; Color patches with -6 < ycor < 6 gray for road
-    if ((pycor > -6) and (pycor < 6)) [ set pcolor gray ]
-    ;; Color every third patch with ycor 2 or -2 white
-    ;; for lane separators on road
-    if ((pycor = 2) and ((pxcor mod 3) = 2)) [ set pcolor white ]
-    if ((pycor = -2) and ((pxcor mod -3) = -2)) [ set pcolor white ]
+    ;; Color all patches in background color
+    set pcolor (road-background-color)
+    ;; Color patches within range in road color
+    if ((pycor > (road-y-min)) and
+        (pycor < (road-y-max))) [
+      set pcolor (road-color)
+    ]
+    ;; Color lane separators on road
+    if ((pycor = (road-lane-separator-1-ycor)) and
+        ((pxcor mod (road-lane-separator-1-x-distance)) =
+         (road-lane-separator-1-ycor))) [
+      set pcolor (road-lane-separator-color)
+    ]
+    if ((pycor = (road-lane-separator-2-ycor)) and
+        ((pxcor mod (road-lane-separator-2-x-distance)) =
+         (road-lane-separator-2-ycor))) [
+      set pcolor (road-lane-separator-color)
+    ]
     ;; Color patches with ycor 6 or -6 black for borders of road
-    if ((pycor = 6) or (pycor = -6)) [ set pcolor black ]
+    if ((pycor = (road-y-max)) or
+        (pycor = (road-y-min))) [
+      set pcolor (road-border-color)
+    ]
   ]
 end
 
