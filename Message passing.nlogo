@@ -238,10 +238,10 @@ end
 ; Edited 2017 by Jan Rezelman for Bachelor Project
 @#$#@#$#@
 GRAPHICS-WINDOW
-271
-21
-819
-252
+181
+14
+729
+245
 -1
 -1
 10.6
@@ -265,10 +265,10 @@ ticks
 30.0
 
 BUTTON
-9
-36
-84
-69
+6
+35
+92
+68
 NIL
 setup
 NIL
@@ -282,10 +282,10 @@ NIL
 1
 
 BUTTON
-11
-121
-86
-154
+4
+120
+92
+153
 go
 drive
 T
@@ -316,10 +316,10 @@ NIL
 1
 
 MONITOR
-270
-466
-384
-511
+556
+254
+670
+299
 average speed
 mean [current-speed] of turtles
 2
@@ -327,10 +327,10 @@ mean [current-speed] of turtles
 11
 
 SLIDER
-104
-36
-266
-69
+6
+164
+168
+197
 number
 number
 0
@@ -342,10 +342,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-104
-116
-266
-149
+7
+249
+169
+282
 slow-down
 slow-down
 0
@@ -357,25 +357,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-104
-75
-266
-108
+6
+204
+168
+237
 speed-up
 speed-up
 0
 100
-38.0
+39.0
 1
 1
 NIL
 HORIZONTAL
 
 PLOT
-271
-282
-637
-458
+182
+254
+548
+430
 Car Speeds
 Time
 Speed
@@ -395,7 +395,7 @@ PENS
 SWITCH
 5
 347
-195
+168
 380
 global-speed-limit?
 global-speed-limit?
