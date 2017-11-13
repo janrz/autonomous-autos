@@ -26,21 +26,6 @@ turtles-own [
   ;; table containing above information
   ;; [ car-left car-front-left car-front car-front-right car-right ]
   surrounding-cars
-
-  ;; TODO: comes from old model, will this be needed?
-  ;; other information
-  ;; the maximum speed of the car (different for all cars)
-  speed-limit
-  ;; the maximum speed allowed when a lane is closed (if enabled)
-  global-speed-limit
-  ;; number of ticks since car switched lanes:
-  ;; a car can only change lanes again after a number of ticks
-  ;; to make them less nervous and more realistic
-  ticks-since-switch
-  ;; random number that dictates how long a car waits before it chooses a better lane
-  max-wait-ticks
-  ;; saves current position to compare to later position
-  current-position
 ]
 
 globals [
@@ -120,15 +105,6 @@ to setup-cars
   ;; Initial speed for all cars is set to .5 plus a random number
   ;; to make sure not all cars are driving the same speed
   set current-speed ((100 + random-float 30) / 100)
-  ;; Set speed limit for a car
-  set speed-limit (((random 11) / 10) + 1)
-  ;; Global speed limit for all cars (disabled by default)
-  set global-speed-limit 0.5
-  ;; Reset counter for ticks since last lane switch
-  set ticks-since-switch 0
-  ;; Number of ticks a car waits before it chooses a better lane
-  ;; is a random number up to 20
-  set max-wait-ticks (random 20)
 
   ;; Put public variables in table car-information
   set car-information table:make
