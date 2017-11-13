@@ -40,6 +40,20 @@ globals [
   road-lane-separator-1-x-distance
   road-lane-separator-2-x-distance
   road-background-color
+  lane-coordinates
+
+  ;; Car information
+  car-shape
+  car-heading
+  initial-speed-constant
+  initial-speed-variable
+  car-color-range
+
+  ;; Relative positions
+  relative-left
+  relative-front
+  relative-right
+  relative-here
 ]
 
 ;; CONSTANTS
@@ -55,14 +69,35 @@ to set-constants
   set road-lane-separator-1-x-distance 3
   set road-lane-separator-2-x-distance -3
   set road-background-color green
+  set lane-coordinates [-4 0 4]
+
+  ;; Car information
+  set car-shape "car"
+  set car-heading 90
+  set initial-speed-constant 100
+  set initial-speed-variable 30
+  set car-color-range 140
+
+  ;; Relative positions (left and right should be switched
+  ;; if heading changes)
+  set relative-left 4
+  set relative-front 1
+  set relative-right -4
+  set relative-here 0
 end
 
 to setup
-  clear-all                            ;; clear area
+  ;; clear everything
+  clear-all
+  ;; set constants
   set-constants
-  draw-road                            ;; draw road and surroundings
-  set-default-shape turtles "car"      ;; give cars their shape
-  create-turtles number [ setup-cars ] ;; create cars
+  ;; draw road and surroundings
+  draw-road
+  ;; give cars their shape
+  set-default-shape turtles car-shape
+  ;; create cars
+  create-turtles number [ setup-cars ]
+  ;; reset tick counter
   reset-ticks
 end
 
@@ -97,14 +132,13 @@ end
 
 to setup-cars
   ;; Give each car random color
-  set color (random 140)
-  ;; Give each car xcor -4, 0 or 4 for different lanes
-  setxy random-xcor one-of [-4 0 4]
-  ;; Heading is 90, to the right
-  set heading 90
-  ;; Initial speed for all cars is set to .5 plus a random number
-  ;; to make sure not all cars are driving the same speed
-  set current-speed ((100 + random-float 30) / 100)
+  set color (random car-color-range)
+  ;; Give each car random xcor and ycor of random lane
+  setxy random-xcor one-of lane-coordinates
+  ;; Set heading
+  set heading car-heading
+  ;; Initial speed for all cars is set
+  set current-speed ((initial-speed-constant + random-float initial-speed-variable) / 100)
 
   ;; Put public variables in table car-information
   set car-information table:make
@@ -144,36 +178,36 @@ end
 to check-surroundings
   ;; check if any cars are directly to the left of the current car and
   ;; set the corresponding boolean variable of the car
-  ifelse (any? turtles-at 0 4) [
-    set car-left [car-information] of (one-of turtles-at 0 4)
+  ifelse (any? turtles-at relative-here relative-left) [
+    set car-left [car-information] of (one-of turtles-at relative-here relative-left)
   ] [
     set car-left false
   ]
   ;; check if any cars are directly to the left of the current car and
   ;; set the corresponding boolean variable of the car
-  ifelse (any? turtles-at 1 4) [
-    set car-front-left [car-information] of (one-of turtles-at 1 4)
+  ifelse (any? turtles-at relative-front relative-left) [
+    set car-front-left [car-information] of (one-of turtles-at relative-front relative-left)
   ] [
     set car-front-left false
   ]
   ;; check if any cars are directly to the left of the current car and
   ;; set the corresponding boolean variable of the car
-  ifelse (any? turtles-at 1 0) [
-    set car-front [car-information] of (one-of turtles-at 1 0)
+  ifelse (any? turtles-at relative-front relative-here) [
+    set car-front [car-information] of (one-of turtles-at relative-front relative-here)
   ] [
     set car-front false
   ]
   ;; check if any cars are directly to the left of the current car and
   ;; set the corresponding boolean variable of the car
-  ifelse (any? turtles-at 1 -4) [
-    set car-front-right [car-information] of (one-of turtles-at 1 -4)
+  ifelse (any? turtles-at relative-front relative-right) [
+    set car-front-right [car-information] of (one-of turtles-at relative-front relative-right)
   ] [
     set car-front-right false
   ]
   ;; check if any cars are directly to the left of the current car and
   ;; set the corresponding boolean variable of the car
-  ifelse (any? turtles-at 0 -4) [
-    set car-right [car-information] of (one-of turtles-at 0 -4)
+  ifelse (any? turtles-at relative-here relative-right) [
+    set car-right [car-information] of (one-of turtles-at relative-here relative-right)
   ] [
     set car-right false
   ]
