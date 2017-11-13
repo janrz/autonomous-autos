@@ -176,36 +176,36 @@ end
 
 ;; VEHICLE PROCEDURES - CHECK SURROUNDINGS
 to check-surroundings
-  ;; check if any cars are directly to the left of the current car and
-  ;; set the corresponding boolean variable of the car
+  ;; check if any cars are directly to the left of the current car and if so,
+  ;; get their information
   ifelse (any? turtles-at relative-here relative-left) [
     set car-left [car-information] of (one-of turtles-at relative-here relative-left)
   ] [
     set car-left false
   ]
-  ;; check if any cars are directly to the left of the current car and
-  ;; set the corresponding boolean variable of the car
+  ;; check if any cars are to the front-left of the current car and if so,
+  ;; get their information
   ifelse (any? turtles-at relative-front relative-left) [
     set car-front-left [car-information] of (one-of turtles-at relative-front relative-left)
   ] [
     set car-front-left false
   ]
-  ;; check if any cars are directly to the left of the current car and
-  ;; set the corresponding boolean variable of the car
+  ;; check if any cars are directly in front of the current car and if so,
+  ;; get their information
   ifelse (any? turtles-at relative-front relative-here) [
     set car-front [car-information] of (one-of turtles-at relative-front relative-here)
   ] [
     set car-front false
   ]
-  ;; check if any cars are directly to the left of the current car and
-  ;; set the corresponding boolean variable of the car
+  ;; check if any cars are to the front-right of the current car and if so,
+  ;; get their information
   ifelse (any? turtles-at relative-front relative-right) [
     set car-front-right [car-information] of (one-of turtles-at relative-front relative-right)
   ] [
     set car-front-right false
   ]
-  ;; check if any cars are directly to the left of the current car and
-  ;; set the corresponding boolean variable of the car
+  ;; check if any cars are directly to the right of the current car and if so,
+  ;; get their information
   ifelse (any? turtles-at relative-here relative-right) [
     set car-right [car-information] of (one-of turtles-at relative-here relative-right)
   ] [
