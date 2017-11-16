@@ -225,6 +225,21 @@ to make-decision
   ;; INPUT: table surrounding-cars containing 5 tables:
   ;; car-left, car-front-left, car-front, car-front-right, car-right
 
+  ;; If a surrounding car has no specific desired speed or lane,
+  ;; set to random or set to current speed and lane
+  foreach surrounding-cars [
+    if ((not table:get car-information "desired-speed") and
+            (not table:get car-information "desired-lane")) [
+      ifelse (decision-assume-random?) [
+        table:put car-information "desired-speed" random 10
+        table:put car-information "desired-speed" one-of [-4 0 4]
+      ] [
+        table:put car-information "desired-speed" (table:get car-information "current-speed")
+        table:put car-information "desired-lane" (table:get car-information "ycor")
+      ]
+    ]
+  ]
+  ;; OUTPUT: set desired-speed, desired-lane for current car
 end
 
 ;; VEHICLE PROCEDURES - MOVE
@@ -403,12 +418,12 @@ PENS
 "selected-car" 1.0 0 -2674135 true "" "plot [current-speed] of selected-car"
 
 SWITCH
-5
-347
-168
-380
-global-speed-limit?
-global-speed-limit?
+13
+446
+210
+479
+decision-assume-random?
+decision-assume-random?
 1
 1
 -1000
