@@ -29,6 +29,9 @@ turtles-own [
 ]
 
 globals [
+  ;; Global monitoring
+  collision-count
+
   ;; Road information
   road-y-min
   road-y-max
@@ -91,6 +94,8 @@ to setup
   clear-all
   ;; set constants
   set-constants
+  ;; reset collision counter
+  set collision-count 0
   ;; draw road and surroundings
   draw-road
   ;; give cars their shape
@@ -145,8 +150,10 @@ to setup-cars
   table:put car-information "current-speed" current-speed
   table:put car-information "xcor" xcor
   table:put car-information "ycor" ycor
-  table:put car-information "desired-speed" false
-  table:put car-information "desired-lane" false
+  ;; set desired-speed to negative number
+  table:put car-information "desired-speed" -1
+  ;; set desired-lane to non-existing lane
+  table:put car-information "desired-lane" -10
 
   ;; Create table to be filled with surrounding cars data
   set surrounding-cars table:make
@@ -227,9 +234,9 @@ to make-decision
 
   ;; If a surrounding car has no specific desired speed or lane,
   ;; set to random or set to current speed and lane
-  foreach surrounding-cars [
-    if ((not table:get car-information "desired-speed") and
-            (not table:get car-information "desired-lane")) [
+  foreach (table:keys surrounding-cars) [
+    if ((table:get car-information "desired-speed" = -1) and
+            (table:get car-information "desired-lane" = -10)) [
       ifelse (decision-assume-random?) [
         table:put car-information "desired-speed" random 10
         table:put car-information "desired-speed" one-of [-4 0 4]
@@ -245,6 +252,9 @@ end
 ;; VEHICLE PROCEDURES - MOVE
 to move
   jump current-speed
+  if (any? turtles-at relative-here relative-here) [
+    set collision-count (collision-count + 1)
+  ]
 end
 
 ;; VEHICLE PROCEDURES - UPDATE OWN INFORMATION
@@ -345,17 +355,17 @@ MONITOR
 254
 670
 299
-average speed
+Average speed
 mean [current-speed] of turtles
 2
 1
 11
 
 SLIDER
-6
-164
-168
-197
+5
+196
+167
+229
 number
 number
 0
@@ -367,10 +377,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-7
-249
-169
-282
+6
+281
+168
+314
 slow-down
 slow-down
 0
@@ -382,10 +392,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-6
-204
-168
-237
+5
+236
+167
+269
 speed-up
 speed-up
 0
@@ -418,15 +428,46 @@ PENS
 "selected-car" 1.0 0 -2674135 true "" "plot [current-speed] of selected-car"
 
 SWITCH
-13
-446
-210
-479
+7
+326
+167
+359
 decision-assume-random?
 decision-assume-random?
-1
+0
 1
 -1000
+
+MONITOR
+556
+302
+670
+347
+Collision count
+collision-count
+0
+1
+11
+
+TEXTBOX
+6
+178
+156
+196
+Settings
+11
+0.0
+1
+
+TEXTBOX
+7
+16
+163
+34
+Run commands
+11
+0.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
