@@ -302,7 +302,7 @@ ticks
 BUTTON
 6
 35
-92
+87
 68
 NIL
 setup
@@ -317,10 +317,10 @@ NIL
 1
 
 BUTTON
-4
-120
-92
-153
+7
+74
+87
+107
 go
 drive
 T
@@ -334,10 +334,10 @@ NIL
 1
 
 BUTTON
-5
-77
-92
-110
+95
+35
+173
+68
 go once
 drive
 NIL
@@ -362,10 +362,10 @@ mean [current-speed] of turtles
 11
 
 SLIDER
-5
-196
-167
-229
+8
+133
+170
+166
 number
 number
 0
@@ -377,10 +377,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-6
-281
-168
-314
+9
+218
+171
+251
 slow-down
 slow-down
 0
@@ -392,10 +392,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-5
-236
-167
-269
+8
+173
+170
+206
 speed-up
 speed-up
 0
@@ -428,10 +428,10 @@ PENS
 "selected-car" 1.0 0 -2674135 true "" "plot [current-speed] of selected-car"
 
 SWITCH
-7
-326
-167
-359
+10
+263
+170
+296
 decision-assume-random?
 decision-assume-random?
 0
@@ -450,10 +450,10 @@ collision-count
 11
 
 TEXTBOX
-6
-178
-156
-196
+9
+115
+159
+133
 Settings
 11
 0.0
