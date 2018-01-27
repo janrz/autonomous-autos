@@ -391,8 +391,8 @@ SLIDER
 218
 171
 251
-slow-down
-slow-down
+deceleration
+deceleration
 0
 100
 78.0
@@ -406,8 +406,8 @@ SLIDER
 173
 170
 206
-speed-up
-speed-up
+acceleration
+acceleration
 0
 100
 39.0
