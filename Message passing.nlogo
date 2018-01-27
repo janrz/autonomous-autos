@@ -257,6 +257,16 @@ to move
   ]
 end
 
+;; VEHICLE PROCEDURES - SPEED UP
+to speed-up
+  set current-speed (current-speed + (acceleration))
+end
+
+;; VEHICLE PROCEDURES - SLOW DOWN
+to slow-down
+  set current-speed (current-speed - (deceleration))
+end
+
 ;; VEHICLE PROCEDURES - UPDATE OWN INFORMATION
 to update-own-information
   table:put car-information "current-speed" current-speed
