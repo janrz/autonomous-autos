@@ -267,6 +267,14 @@ to slow-down
   set current-speed (current-speed - (deceleration))
 end
 
+to move-left
+  set ycor (ycor + relative-left)
+end
+
+to move-right
+  set ycor (ycor + relative-right)
+end
+
 ;; VEHICLE PROCEDURES - UPDATE OWN INFORMATION
 to update-own-information
   table:put car-information "current-speed" current-speed
