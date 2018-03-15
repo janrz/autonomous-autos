@@ -361,7 +361,7 @@ NIL
 G
 NIL
 NIL
-1
+0
 
 BUTTON
 95
@@ -386,7 +386,7 @@ MONITOR
 670
 299
 Average speed
-mean [current-speed] of turtles
+(mean [current-speed] of turtles) * 100
 2
 1
 11
@@ -513,6 +513,17 @@ max-speed
 1
 NIL
 HORIZONTAL
+
+MONITOR
+556
+352
+670
+397
+Fitness
+((mean [current-speed] of turtles) * 100) - (collision-count / ticks)
+5
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
