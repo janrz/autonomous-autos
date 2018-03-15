@@ -31,6 +31,7 @@ turtles-own [
 globals [
   ;; Global monitoring
   collision-count
+  front-check-counter
 
   ;; Road information
   road-y-min
@@ -202,7 +203,15 @@ to check-surroundings
   ifelse (any? turtles-at relative-front relative-here) [
     set car-front [car-information] of (one-of turtles-at relative-front relative-here)
   ] [
-    set car-front false
+    set front-check-counter 2
+    while [not any? turtles-at front-check-counter relative-here and front-check-counter < 25] [
+      set front-check-counter front-check-counter + 1
+    ]
+    ifelse (any? turtles-at front-check-counter relative-here) [
+      set car-front [car-information] of (one-of turtles-at front-check-counter relative-here)
+    ] [
+      set car-front false
+    ]
   ]
   ;; check if any cars are to the front-right of the current car and if so,
   ;; get their information
