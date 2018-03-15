@@ -246,6 +246,18 @@ to make-decision
       ]
     ]
   ]
+
+  ifelse (
+    (car-front != false) and
+    (table:get car-front "current-speed" < current-speed) and
+    (current-speed > 1)) [
+    slow-down
+  ] [
+    if (current-speed < (max-speed / 100)) [
+      speed-up
+    ]
+  ]
+
   ;; OUTPUT: set desired-speed, desired-lane for current car
 end
 
@@ -259,12 +271,12 @@ end
 
 ;; VEHICLE PROCEDURES - SPEED UP
 to speed-up
-  set current-speed (current-speed + (acceleration))
+  set current-speed (current-speed + (acceleration / 1000))
 end
 
 ;; VEHICLE PROCEDURES - SLOW DOWN
 to slow-down
-  set current-speed (current-speed - (deceleration))
+  set current-speed (current-speed - (deceleration / 1000))
 end
 
 to move-left
@@ -311,8 +323,8 @@ GRAPHICS-WINDOW
 25
 -10
 10
-1
-1
+0
+0
 1
 ticks
 30.0
@@ -447,9 +459,9 @@ PENS
 
 SWITCH
 10
-263
+300
 170
-296
+333
 decision-assume-random?
 decision-assume-random?
 0
@@ -486,6 +498,21 @@ Run commands
 11
 0.0
 1
+
+SLIDER
+9
+261
+170
+294
+max-speed
+max-speed
+0
+200
+134.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
