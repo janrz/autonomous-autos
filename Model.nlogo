@@ -165,6 +165,8 @@ end
 
 ;; DRIVING LOOP, ADJUSTED TO NEW MESSAGE PASSING
 to drive
+  ;; if all cars are crashed, stop the simulation
+  if (count (turtles with [crashed? = 0]) = 0) [ stop ]
   ;; first let all non-crashed cars check surroundings and decide on action
   ask turtles with [crashed? = 0] [
     ;; car checks surroundings: speed, position and intention of other cars
@@ -423,7 +425,7 @@ number
 number
 0
 134
-2.0
+25.0
 1
 1
 NIL
@@ -438,7 +440,7 @@ deceleration
 deceleration
 0
 100
-80.0
+50.0
 1
 1
 NIL
@@ -453,7 +455,7 @@ acceleration
 acceleration
 0
 100
-40.0
+50.0
 1
 1
 NIL
