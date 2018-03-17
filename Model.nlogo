@@ -11,6 +11,8 @@ turtles-own [
   desired-speed        ;; the speed the car wants to change to
   desired-lane         ;; the lane the car wants to change to
 
+  crashed?             ;; boolean, true if car collided with another car
+
   ;; table containing above information
   ;; [ current-speed xcor ycor desired-speed desired-lane ]
   car-information
@@ -175,9 +177,16 @@ to drive
   ;; then let all cars act upon decisions and update public information
   ask turtles [
     ;; car acts based on decision
-    move
+    if crashed? = 0 [ move ]
     ;; car updates public information
     update-own-information
+  ]
+  ask patches [
+    if count turtles-here > 1 [
+      ask turtles-here [
+        crash
+      ]
+    ]
   ]
   tick
 end
@@ -273,9 +282,6 @@ end
 ;; VEHICLE PROCEDURES - MOVE
 to move
   jump current-speed
-  if (any? turtles-at relative-here relative-here) [
-    set collision-count (collision-count + 1)
-  ]
 end
 
 ;; VEHICLE PROCEDURES - SPEED UP
@@ -294,6 +300,12 @@ end
 
 to move-right
   set ycor (ycor + relative-right)
+end
+
+to crash
+  set color red
+  set current-speed 0
+  set crashed? 1
 end
 
 ;; VEHICLE PROCEDURES - UPDATE OWN INFORMATION
@@ -395,7 +407,7 @@ MONITOR
 670
 299
 Average speed
-(mean [current-speed] of turtles) * 100
+(mean [current-speed] of turtles)
 2
 1
 11
@@ -409,7 +421,7 @@ number
 number
 0
 134
-134.0
+41.0
 1
 1
 NIL
@@ -424,7 +436,7 @@ deceleration
 deceleration
 0
 100
-78.0
+80.0
 1
 1
 NIL
@@ -439,7 +451,7 @@ acceleration
 acceleration
 0
 100
-39.0
+40.0
 1
 1
 NIL
@@ -517,7 +529,7 @@ max-speed
 max-speed
 0
 200
-134.0
+130.0
 1
 1
 NIL
