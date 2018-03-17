@@ -248,6 +248,10 @@ to make-decision
   ;; INPUT: table surrounding-cars containing 5 tables:
   ;; car-left, car-front-left, car-front, car-front-right, car-right
 
+  if (car-front = false and current-speed < max-speed) [
+    speed-up
+  ]
+
   ;; If a surrounding car has no specific desired speed or lane,
   ;; set to random or set to current speed and lane
   foreach (table:keys surrounding-cars) [
@@ -419,7 +423,7 @@ number
 number
 0
 134
-64.0
+2.0
 1
 1
 NIL
@@ -526,9 +530,9 @@ SLIDER
 max-speed
 max-speed
 0
-200
-130.0
-1
+2
+1.3
+.01
 1
 NIL
 HORIZONTAL
