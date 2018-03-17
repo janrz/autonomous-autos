@@ -258,15 +258,15 @@ to make-decision
   ]
 
   ;; make decision
-  if ((car-front = false and current-speed < max-speed) or
+  if ((car-front = false) or
       (car-front-speed > current-speed)) [
     speed-up
     stop
   ]
-  if (car-front = false and current-speed >= max-speed) [
+  if (car-front = false) [
     stop
   ]
-  if (car-front != false and car-front-speed < current-speed) [
+  if (car-front != false and car-front-speed <= current-speed) [
     slow-down
     stop
   ]
@@ -307,12 +307,17 @@ end
 
 ;; VEHICLE PROCEDURES - SPEED UP
 to speed-up
-  set current-speed (current-speed + (acceleration / 1000))
+  if current-speed < max-speed [
+    set current-speed (current-speed + (acceleration / 1000))
+  ]
 end
 
 ;; VEHICLE PROCEDURES - SLOW DOWN
 to slow-down
   set current-speed (current-speed - (deceleration / 1000))
+  if current-speed <= 0 [
+    set current-speed 0
+  ]
 end
 
 to move-left
@@ -442,7 +447,7 @@ number
 number
 0
 134
-20.0
+10.0
 1
 1
 NIL
