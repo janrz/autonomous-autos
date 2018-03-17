@@ -165,17 +165,17 @@ end
 
 ;; DRIVING LOOP, ADJUSTED TO NEW MESSAGE PASSING
 to drive
-  ;; first let all cars check surroundings and decide on action
-  ask turtles [
+  ;; first let all non-crashed cars check surroundings and decide on action
+  ask turtles with [crashed? = 0] [
     ;; car checks surroundings: speed, position and intention of other cars
     check-surroundings
     ;; car makes decision on speed and lane: change or keep the same
     make-decision
   ]
   ;; then let all cars act upon decisions and update public information
-  ask turtles [
+  ask turtles with [crashed? = 0] [
     ;; car acts based on decision
-    if crashed? = 0 [ move ]
+    move
     ;; car updates public information
     update-own-information
   ]
@@ -419,7 +419,7 @@ number
 number
 0
 134
-41.0
+64.0
 1
 1
 NIL
