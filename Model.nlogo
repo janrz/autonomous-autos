@@ -178,6 +178,8 @@ to drive
   ask turtles with [crashed? = 0] [
     ;; car acts based on decision
     move
+  ]
+  ask turtles [
     ;; car updates public information
     update-own-information
   ]
@@ -249,9 +251,24 @@ end
 to make-decision
   ;; INPUT: table surrounding-cars containing 5 tables:
   ;; car-left, car-front-left, car-front, car-front-right, car-right
+  ;; set local variable for speed of car in front
+  let car-front-speed 10
+  if (car-front != false) [
+    set car-front-speed (table:get car-front "current-speed")
+  ]
 
-  if (car-front = false and current-speed < max-speed) [
+  ;; make decision
+  if ((car-front = false and current-speed < max-speed) or
+      (car-front-speed > current-speed)) [
     speed-up
+    stop
+  ]
+  if (car-front = false and current-speed >= max-speed) [
+    stop
+  ]
+  if (car-front != false and car-front-speed < current-speed) [
+    slow-down
+    stop
   ]
 
   ;; If a surrounding car has no specific desired speed or lane,
@@ -425,7 +442,7 @@ number
 number
 0
 134
-25.0
+20.0
 1
 1
 NIL
