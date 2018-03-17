@@ -53,7 +53,6 @@ globals [
   car-heading
   initial-speed-constant
   initial-speed-variable
-  car-color-range
 
   ;; Relative positions
   relative-left
@@ -82,7 +81,6 @@ to set-constants
   set car-heading 90
   set initial-speed-constant 100
   set initial-speed-variable 30
-  set car-color-range 140
 
   ;; Relative positions (left and right should be switched
   ;; if heading changes)
@@ -139,8 +137,8 @@ to draw-road
 end
 
 to setup-cars
-  ;; Give each car random color
-  set color (random car-color-range)
+  ;; Color car
+  set color black
   ;; Give each car random xcor and ycor of random lane
   setxy random-xcor one-of lane-coordinates
   ;; Set heading
