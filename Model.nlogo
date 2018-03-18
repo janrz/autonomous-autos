@@ -258,18 +258,30 @@ to make-decision
   ]
 
   ;; make decision
+  ;; if no car in front or car in front is faster, speed up
   if ((car-front = false) or
       (car-front-speed > current-speed)) [
     speed-up
     stop
   ]
-  if (car-front = false) [
-    stop
-  ]
+  ;; if car in front is slower, slow down
   if (car-front != false and car-front-speed <= current-speed) [
     slow-down
     stop
   ]
+  ;; if car in front and to the left but not to the right
+  if (car-front != false and
+      car-left != false and
+      car-right = false) [
+    ;; do stuff, TODO implement monitoring cars behind
+  ]
+  ;; if car in front and to the right but not to the left
+  if (car-front != false and
+      car-right != false and
+      car-left = false) [
+    ;; do stuff, TODO implement monitoring cars behind
+  ]
+  ;; if car in front and none left or right, overtake on the left like a good citizen
 
   ;; If a surrounding car has no specific desired speed or lane,
   ;; set to random or set to current speed and lane
@@ -447,7 +459,7 @@ number
 number
 0
 134
-10.0
+50.0
 1
 1
 NIL

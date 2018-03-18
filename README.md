@@ -4,8 +4,6 @@ Architecture in pseudo-code:
 
 if ((no car-ahead and speed < max-speed) or (car-ahead and car-ahead-speed > own-speed)) {
     speed-up
-} else if (no car-ahead and speed = max-speed) {
-    keep-same-speed
 } else if ((car-ahead and car-ahead-speed < own-speed) and car-left and car-right) {
     slow-down
 } else if (car-ahead and car-left and no car-right) {
@@ -20,7 +18,7 @@ if ((no car-ahead and speed < max-speed) or (car-ahead and car-ahead-speed > own
     } else if (no car-left-behind or (car-left-behind and car-left-behind-speed > own-speed)) {
         slow-down
     }
-} else if (car-ahead and no car-left and no car-right and (no car-right-behind or (car-right-behind and car-right-behind-speed <= own-speed))) {
+} else if (car-ahead and no car-left and no car-right and (no car-left-behind or (car-left-behind and car-left-behind-speed <= own-speed))) {
     move-left
 }
 
