@@ -24,6 +24,8 @@ turtles-own [
   car-front            ;; information about car in front
   car-front-right      ;; information about car to the front right
   car-right            ;; information about car to the right
+  car-rear-left        ;; information about car to the rear left
+  car-rear-right       ;; information about car to the rear right
 
   ;; table containing above information
   ;; [ car-left car-front-left car-front car-front-right car-right ]
@@ -59,6 +61,7 @@ globals [
   relative-front
   relative-right
   relative-here
+  relative-rear
 ]
 
 ;; CONSTANTS
@@ -88,6 +91,7 @@ to set-constants
   set relative-front 1
   set relative-right -4
   set relative-here 0
+  set relative-rear -1
 end
 
 to setup
@@ -238,6 +242,20 @@ to check-surroundings
   ] [
     set car-right false
   ]
+  ;; check if any cars are to the rear-left of the current car and if so,
+  ;; get their information
+  ifelse (any? turtles-at relative-rear relative-left) [
+    set car-rear-left [car-information] of (one-of turtles-at relative-rear relative-left)
+  ] [
+    set car-rear-left false
+  ]
+  ;; check if any cars are to the rear-right of the current car and if so,
+  ;; get their information
+  ifelse (any? turtles-at relative-rear relative-right) [
+    set car-rear-right [car-information] of (one-of turtles-at relative-rear relative-right)
+  ] [
+    set car-rear-right false
+  ]
 
   ;; fill table surrounding-cars with tables car-information of surrounding cars
   table:put surrounding-cars "car-left" car-left
@@ -245,6 +263,8 @@ to check-surroundings
   table:put surrounding-cars "car-front" car-front
   table:put surrounding-cars "car-front-right" car-front-right
   table:put surrounding-cars "car-right" car-right
+  table:put surrounding-cars "car-rear-left" car-rear-left
+  table:put surrounding-cars "car-rear-right" car-rear-right
 end
 
 ;; VEHICLE PROCEDURES - MAKE DECISION
