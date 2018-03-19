@@ -290,15 +290,42 @@ to make-decision
   if (car-front != false and
       car-left != false and
       car-right = false) [
-    ;; do stuff, TODO implement monitoring cars behind
+    if ((car-rear-right = false or
+        (car-rear-right != false and table:get car-rear-right "current-speed" <= current-speed)) and
+        (car-front-right = false or table:get car-front-right "current-speed" >= current-speed)) [
+      move-right
+      stop
+    ]
+    if (car-rear-right != false and
+        (table:get car-rear-right "current-speed" > current-speed)) [
+      slow-down
+      stop
+    ]
   ]
   ;; if car in front and to the right but not to the left
   if (car-front != false and
       car-right != false and
       car-left = false) [
-    ;; do stuff, TODO implement monitoring cars behind
+    if ((car-rear-left = false or
+        (car-rear-left != false and table:get car-rear-left "current-speed" <= current-speed)) and
+        (car-front-left = false or table:get car-front-left "current-speed" >= current-speed)) [
+      move-left
+      stop
+    ]
+    if (car-rear-left != false and
+        (table:get car-rear-left "current-speed" > current-speed)) [
+      slow-down
+      stop
+    ]
   ]
   ;; if car in front and none left or right, overtake on the left like a good citizen
+  if (car-front != false and
+      car-left = false and
+      car-right = false and
+      (car-rear-left = false or
+       table:get car-rear-left "current-speed" < current-speed)) [
+    move-left
+  ]
 end
 
 ;; VEHICLE PROCEDURES - MOVE
