@@ -269,9 +269,6 @@ end
 
 ;; VEHICLE PROCEDURES - MAKE DECISION
 to make-decision
-  ;; INPUT: table surrounding-cars containing 5 tables:
-  ;; car-left, car-front-left, car-front, car-front-right, car-right
-  ;; set local variable for speed of car in front
   let car-front-speed 10
   if (car-front != false) [
     set car-front-speed (table:get car-front "current-speed")
@@ -302,34 +299,6 @@ to make-decision
     ;; do stuff, TODO implement monitoring cars behind
   ]
   ;; if car in front and none left or right, overtake on the left like a good citizen
-
-  ;; If a surrounding car has no specific desired speed or lane,
-  ;; set to random or set to current speed and lane
-  foreach (table:keys surrounding-cars) [
-    if ((table:get car-information "desired-speed" = -1) and
-            (table:get car-information "desired-lane" = -10)) [
-      ifelse (decision-assume-random?) [
-        table:put car-information "desired-speed" random 10
-        table:put car-information "desired-speed" one-of [-4 0 4]
-      ] [
-        table:put car-information "desired-speed" (table:get car-information "current-speed")
-        table:put car-information "desired-lane" (table:get car-information "ycor")
-      ]
-    ]
-  ]
-
-  ifelse (
-    (car-front != false) and
-    (table:get car-front "current-speed" < current-speed) and
-    (current-speed > 1)) [
-    slow-down
-  ] [
-    if (current-speed < (max-speed / 100)) [
-      speed-up
-    ]
-  ]
-
-  ;; OUTPUT: set desired-speed, desired-lane for current car
 end
 
 ;; VEHICLE PROCEDURES - MOVE
