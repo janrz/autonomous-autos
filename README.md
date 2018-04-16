@@ -22,5 +22,35 @@ if ((no car-ahead and speed < max-speed) or (car-ahead and car-ahead-speed > own
     move-left
 }
 
+Revision:
+Goal: keep own speed as high as possible
+
+if car-front and car-front-speed < own-speed {
+
+    ;; try to overtake on the left side
+    ;; if no car directly left
+    if (not car-left) {
+        if (not car-front-left) {
+            if (not car-rear-left) {
+                move-left
+            }
+            if (car-rear-left-speed <= own-speed) {
+                move-left
+            }
+        } else {
+            if (not car-rear-left and car-front-left-speed >= own-speed) {
+                    move-left
+                }
+            } else {
+                if (car-front-left-speed >= own-speed and car-rear-left-speed <= own-speed) {
+
+                }
+            }
+        }
+            not car-rear-left and car-front-left-speed >= own-speed) or
+            car-rear-left and car-front-left-speed >= own-speed and car-rear-left-speed <= own-speed)
+    }
+        
+}
 Jan Rezelman
 VU University Amsterdam

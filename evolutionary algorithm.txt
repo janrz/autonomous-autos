@@ -1,0 +1,26 @@
+function generateRandomGenome() {
+	$genome = array();
+	for ($i = 0; $i < 10; $i++) {
+		$genome[] = rand(0,1);
+	}
+	return $genome;
+}
+
+function getBestGenome($generation) {
+	$highestFitness = 0;
+	$bestGenome = '';
+	foreach ($generation as $genome) {
+		$fitness = getFitness($genome);
+		if ($fitness > $highestFitness) {
+			$bestGenome = $genome;
+		}
+	}
+	return $bestGenome;
+}
+
+$firstGeneration = array();
+for ($i = 0; $i < 10; $i++) {
+	$firstGeneration[] = generateRandomGenome();
+}
+
+$bestGenome = getBestGenome($firstGeneration);
