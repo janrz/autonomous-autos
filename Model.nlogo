@@ -34,7 +34,7 @@ turtles-own [
 
 globals [
   ;; Global monitoring
-  collision-count
+  crashed-cars
   front-check-counter
 
   ;; Road information
@@ -100,7 +100,7 @@ to setup
   ;; set constants
   set-constants
   ;; reset collision counter
-  set collision-count 0
+  set crashed-cars 0
   ;; draw road and surroundings
   draw-road
   ;; give cars their shape
@@ -307,6 +307,7 @@ to move-right
 end
 
 to crash
+  if crashed? = 0 [ set crashed-cars crashed-cars + 1 ]
   set color red
   set current-speed 0
   set crashed? 1
@@ -498,8 +499,8 @@ MONITOR
 302
 670
 347
-Collision count
-collision-count
+Crashed cars
+crashed-cars
 0
 1
 11
@@ -545,7 +546,7 @@ MONITOR
 670
 397
 Fitness
-((mean [current-speed] of turtles) * 100) - (collision-count / ticks)
+((mean [current-speed] of turtles) * 100) - (crashed-cars / ticks)
 5
 1
 11
@@ -919,7 +920,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.1
+NetLogo 6.0.2
 @#$#@#$#@
 setup
 repeat 50 [ drive ]
