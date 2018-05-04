@@ -546,7 +546,7 @@ MONITOR
 670
 397
 Fitness
-((mean [current-speed] of turtles) * 100) - (crashed-cars / ticks)
+(mean [current-speed] of turtles) - (crashed-cars / ticks)
 5
 1
 11
