@@ -50,6 +50,15 @@ globals [
   road-background-color
   lane-coordinates
 
+  ;; Genome boundaries
+  ;; TODO add as needed
+  max-speed-max
+  max-speed-min
+  acceleration-max
+  acceleration-min
+  deceleration-max
+  deceleration-min
+
   ;; Car information
   car-shape
   car-heading
@@ -79,6 +88,13 @@ to set-constants
   set road-background-color green
   set lane-coordinates [-4 0 4]
 
+  set max-speed-max 1.5
+  set max-speed-min .6
+  set acceleration-max 100
+  set acceleration-min 10
+  set deceleration-max 100
+  set deceleration-min 10
+
   ;; Car information
   set car-shape "car"
   set car-heading 90
@@ -99,14 +115,22 @@ to setup
   clear-all
   ;; set constants
   set-constants
-  ;; reset collision counter
-  set crashed-cars 0
   ;; draw road and surroundings
   draw-road
   ;; give cars their shape
   set-default-shape turtles car-shape
+  ;; reset environment for next genome
+  reset-environment
+  ;; create initial parent population
+  create-initial-population
+end
+
+to reset-environment
+  ;; reset collision counter
+  set crashed-cars 0
   ;; create cars
-  create-turtles number [ setup-cars ]
+  clear-turtles
+  create-turtles number-of-cars [ setup-cars ]
   ;; reset tick counter
   reset-ticks
 end
@@ -167,10 +191,36 @@ to setup-cars
   loop [ ifelse any? other turtles-here [ fd 1 ] [ stop ] ]
 end
 
-;; DRIVING LOOP, ADJUSTED TO NEW MESSAGE PASSING
-to drive
+to set-random-genome
+  set max-speed precision (max-speed-min + random-float (max-speed-max - max-speed-min)) 2
+  set acceleration precision (acceleration-min + random-float (acceleration-max - acceleration-min)) 2
+  set deceleration precision (deceleration-min + random-float (deceleration-max - deceleration-min)) 2
+end
+
+;; EVOLUTION LOOP
+to run-simulation
+
+end
+
+to create-initial-population
+  repeat 10 [
+    reset-environment
+    set-random-genome
+    repeat number-of-ticks [run-genome]
+    store-fitness
+  ]
+end
+
+to store-fitness
+  ;; TODO
+  ;; create list of genome parameters with fitness
+end
+
+to run-genome
   ;; if all cars are crashed, stop the simulation
-  if (count (turtles with [crashed? = 0]) = 0) [ stop ]
+  ;;if (count (turtles with [crashed? = 0]) = 0) [ ;; TODO or ticks >= ticksmax?
+  ;;  stop
+  ;;]
   ;; first let all non-crashed cars check surroundings and decide on action
   ask turtles with [crashed? = 0] [
     ;; car checks surroundings: speed, position and intention of other cars
@@ -326,7 +376,7 @@ end
 ; See Info tab for full copyright and license.
 ; Edited 2016 by Jan Rezelman and Nousha van Dijk
 ; for the Collective Intelligence course at VU University, Amsterdam
-; Edited 2017 by Jan Rezelman for Bachelor Project
+; Edited 2018 by Jan Rezelman for Bachelor Project
 @#$#@#$#@
 GRAPHICS-WINDOW
 181
@@ -378,7 +428,7 @@ BUTTON
 87
 107
 go
-drive
+run-simulation
 T
 1
 T
@@ -395,7 +445,7 @@ BUTTON
 173
 68
 go once
-drive
+run-simulation
 NIL
 1
 T
@@ -422,8 +472,8 @@ SLIDER
 133
 170
 166
-number
-number
+number-of-cars
+number-of-cars
 0
 134
 50.0
@@ -433,34 +483,34 @@ NIL
 HORIZONTAL
 
 SLIDER
-9
-218
-171
-251
+278
+460
+315
+610
 deceleration
 deceleration
 0
 100
-50.0
+80.92
 1
 1
 NIL
-HORIZONTAL
+VERTICAL
 
 SLIDER
-8
-173
-170
-206
+230
+460
+267
+610
 acceleration
 acceleration
 0
 100
-50.0
+20.72
 1
 1
 NIL
-HORIZONTAL
+VERTICAL
 
 PLOT
 182
@@ -482,17 +532,6 @@ PENS
 "max" 1.0 0 -11221820 true "" "plot max [current-speed] of turtles"
 "min" 1.0 0 -13345367 true "" "plot min [current-speed] of turtles"
 "selected-car" 1.0 0 -2674135 true "" "plot [current-speed] of selected-car"
-
-SWITCH
-10
-300
-170
-333
-decision-assume-random?
-decision-assume-random?
-0
-1
--1000
 
 MONITOR
 556
@@ -526,19 +565,19 @@ Run commands
 1
 
 SLIDER
-9
-261
-170
-294
+182
+460
+219
+610
 max-speed
 max-speed
 0
 2
-1.3
+1.05
 .01
 1
 NIL
-HORIZONTAL
+VERTICAL
 
 MONITOR
 556
@@ -550,6 +589,31 @@ Fitness
 5
 1
 11
+
+TEXTBOX
+182
+439
+332
+457
+Genome
+12
+0.0
+1
+
+SLIDER
+9
+176
+171
+209
+number-of-ticks
+number-of-ticks
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
