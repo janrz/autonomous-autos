@@ -1,6 +1,6 @@
 extensions [array table]
-;; SETUP
 
+;; VARIABLES
 ;; These variables all apply to only one car
 turtles-own [
   ;; Variables that other cars have access to
@@ -115,6 +115,7 @@ to set-constants
   set relative-rear -1
 end
 
+;; INITIAL SETUP
 to setup
   ;; clear everything
   clear-all
@@ -185,7 +186,6 @@ to setup-cars
     (initial-speed-constant +
       random-float initial-speed-variable
     ) / 100)
-
   ;; Put public variables in table car-information
   set car-information table:make
   table:put car-information "current-speed" current-speed
@@ -203,6 +203,23 @@ to setup-cars
   loop [ ifelse any? other turtles-here [ fd 1 ] [ stop ] ]
 end
 
+;; EVOLUTIONARY ALGORITHM
+
+;; create initial population
+to create-initial-population
+  set genome-count 0
+  ;; create empty arrays for storing genomes
+  set parent-population array:from-list n-values population-size [0]
+  set child-population array:from-list n-values population-size [0]
+
+  repeat population-size [
+    set-random-genome
+    test-genome
+    store-genome-parent
+  ]
+end
+
+;; set random parameters to genome for initial population
 to set-random-genome
   ;; set all genome parameters to
   ;; random values within parameter boundaries
@@ -278,19 +295,6 @@ to-report get-parent-genome
   report array:item parent-population random (population-size - 1)
 end
 
-to create-initial-population
-  set genome-count 0
-  ;; create empty arrays for storing genomes
-  set parent-population array:from-list n-values population-size [0]
-  set child-population array:from-list n-values population-size [0]
-
-  repeat population-size [
-    set-random-genome
-    test-genome
-    store-genome-parent
-  ]
-end
-
 to test-genome
   set genome-count genome-count + 1
   reset-environment
@@ -323,6 +327,8 @@ to-report fitness
   report (mean [current-speed] of turtles) - (crashed-cars / ticks)
 end
 
+;; Run genome one step in time, called multiple
+;; times to test genome behaviour
 to run-genome
   ;; first let all non-crashed cars check surroundings and decide on action
   ask turtles with [crashed? = 0] [
@@ -355,28 +361,40 @@ to check-surroundings
   ;; check if any cars are directly to the left of the current car and if so,
   ;; get their information
   ifelse (any? turtles-at relative-here relative-left) [
-    set car-left [car-information] of (one-of turtles-at relative-here relative-left)
+    set car-left
+      [car-information] of (
+        one-of turtles-at relative-here relative-left
+      )
   ] [
     set car-left false
   ]
   ;; check if any cars are to the front-left of the current car and if so,
   ;; get their information
   ifelse (any? turtles-at relative-front relative-left) [
-    set car-front-left [car-information] of (one-of turtles-at relative-front relative-left)
+    set car-front-left
+      [car-information] of (
+        one-of turtles-at relative-front relative-left
+      )
   ] [
     set car-front-left false
   ]
   ;; check if any cars are directly in front of the current car and if so,
   ;; get their information
   ifelse (any? turtles-at relative-front relative-here) [
-    set car-front [car-information] of (one-of turtles-at relative-front relative-here)
+    set car-front
+      [car-information] of (
+        one-of turtles-at relative-front relative-here
+      )
   ] [
     set front-check-counter 2
     while [not any? turtles-at front-check-counter relative-here and front-check-counter < 25] [
       set front-check-counter front-check-counter + 1
     ]
     ifelse (any? turtles-at front-check-counter relative-here) [
-      set car-front [car-information] of (one-of turtles-at front-check-counter relative-here)
+      set car-front
+        [car-information] of (
+          one-of turtles-at front-check-counter relative-here
+        )
     ] [
       set car-front false
     ]
@@ -384,28 +402,40 @@ to check-surroundings
   ;; check if any cars are to the front-right of the current car and if so,
   ;; get their information
   ifelse (any? turtles-at relative-front relative-right) [
-    set car-front-right [car-information] of (one-of turtles-at relative-front relative-right)
+    set car-front-right
+      [car-information] of (
+        one-of turtles-at relative-front relative-right
+      )
   ] [
     set car-front-right false
   ]
   ;; check if any cars are directly to the right of the current car and if so,
   ;; get their information
   ifelse (any? turtles-at relative-here relative-right) [
-    set car-right [car-information] of (one-of turtles-at relative-here relative-right)
+    set car-right
+      [car-information] of (
+        one-of turtles-at relative-here relative-right
+      )
   ] [
     set car-right false
   ]
   ;; check if any cars are to the rear-left of the current car and if so,
   ;; get their information
   ifelse (any? turtles-at relative-rear relative-left) [
-    set car-rear-left [car-information] of (one-of turtles-at relative-rear relative-left)
+    set car-rear-left
+      [car-information] of (
+        one-of turtles-at relative-rear relative-left
+      )
   ] [
     set car-rear-left false
   ]
   ;; check if any cars are to the rear-right of the current car and if so,
   ;; get their information
   ifelse (any? turtles-at relative-rear relative-right) [
-    set car-rear-right [car-information] of (one-of turtles-at relative-rear relative-right)
+    set car-rear-right
+      [car-information] of (
+        one-of turtles-at relative-rear relative-right
+      )
   ] [
     set car-rear-right false
   ]
