@@ -1,5 +1,4 @@
-extensions [table]
-
+extensions [array table]
 ;; SETUP
 
 ;; These variables all apply to only one car
@@ -36,6 +35,8 @@ globals [
   ;; Global monitoring
   crashed-cars
   front-check-counter
+  generation-count
+  genome-count
 
   ;; Road information
   road-y-min
@@ -50,15 +51,6 @@ globals [
   road-background-color
   lane-coordinates
 
-  ;; Genome boundaries
-  ;; TODO add as needed
-  max-speed-max
-  max-speed-min
-  acceleration-max
-  acceleration-min
-  deceleration-max
-  deceleration-min
-
   ;; Car information
   car-shape
   car-heading
@@ -71,6 +63,19 @@ globals [
   relative-right
   relative-here
   relative-rear
+
+  ;; Genome boundaries
+  ;; TODO add as needed
+  max-speed-max
+  max-speed-min
+  acceleration-max
+  acceleration-min
+  deceleration-max
+  deceleration-min
+
+  ;; Genome storing
+  parent-population
+  child-population
 ]
 
 ;; CONSTANTS
@@ -121,6 +126,8 @@ to setup
   set-default-shape turtles car-shape
   ;; reset environment for next genome
   reset-environment
+  ;; reset generation counter
+  set generation-count 1
   ;; create initial parent population
   create-initial-population
 end
@@ -128,6 +135,8 @@ end
 to reset-environment
   ;; reset collision counter
   set crashed-cars 0
+  ;; reset plot
+  clear-plot
   ;; create cars
   clear-turtles
   create-turtles number-of-cars [ setup-cars ]
@@ -172,7 +181,10 @@ to setup-cars
   ;; Set heading
   set heading car-heading
   ;; Initial speed for all cars is set
-  set current-speed ((initial-speed-constant + random-float initial-speed-variable) / 100)
+  set current-speed (
+    (initial-speed-constant +
+      random-float initial-speed-variable
+    ) / 100)
 
   ;; Put public variables in table car-information
   set car-information table:make
@@ -192,35 +204,126 @@ to setup-cars
 end
 
 to set-random-genome
-  set max-speed precision (max-speed-min + random-float (max-speed-max - max-speed-min)) 2
-  set acceleration precision (acceleration-min + random-float (acceleration-max - acceleration-min)) 2
-  set deceleration precision (deceleration-min + random-float (deceleration-max - deceleration-min)) 2
+  ;; set all genome parameters to
+  ;; random values within parameter boundaries
+  set max-speed
+    precision (
+      max-speed-min +
+      random-float (max-speed-max - max-speed-min)
+    ) 2
+  set acceleration
+    precision (
+      acceleration-min +
+      random-float (acceleration-max - acceleration-min)
+    ) 2
+  set deceleration
+    precision (
+      deceleration-min +
+      random-float (deceleration-max - deceleration-min)
+    ) 2
 end
 
 ;; EVOLUTION LOOP
 to run-simulation
+  set genome-count 0
+  set generation-count generation-count + 1
+  ;; create children from parent population,
+  ;; creates two children per loop,
+  ;; so repeat (population-size / 2) times
+  repeat (population-size / 2) [
+    let child1 create-child-genome
+    let child2 create-child-genome
+    set child1 mutate child1
+    set child2 mutate child2
+    ;; TODO
+    let dummy set-genome-parameters child1
+    test-genome
+    store-genome-child
+    set dummy set-genome-parameters child2
+    test-genome
+    store-genome-child
+  ]
+  ;; TODO combine child and parent population
+  ;; to create new parent population
+end
 
+to-report set-genome-parameters [genome]
+  ;;TODO add all parameters when decided
+  set max-speed table:get genome "max-speed"
+  set acceleration table:get genome "acceleration"
+  set deceleration table:get genome "deceleration"
+  report 0
+end
+
+to-report mutate [genome]
+  ;; TODO mutation with probability
+  let mutated-genome genome
+  report mutated-genome
+end
+
+to-report create-child-genome
+  ;; create empty genome
+  let child-genome table:make
+  ;; get two parents
+  let parent1 get-parent-genome
+  let parent2 get-parent-genome
+  ;; TODO perform single-point crossover
+  ;; TODO add crossed genes to child-genome
+  set child-genome parent1
+  report child-genome
+end
+
+to-report get-parent-genome
+  ;; TODO add tournament selection, now random
+  report array:item parent-population random (population-size - 1)
 end
 
 to create-initial-population
-  repeat 10 [
-    reset-environment
+  set genome-count 0
+  ;; create empty arrays for storing genomes
+  set parent-population array:from-list n-values population-size [0]
+  set child-population array:from-list n-values population-size [0]
+
+  repeat population-size [
     set-random-genome
-    repeat number-of-ticks [run-genome]
-    store-fitness
+    test-genome
+    store-genome-parent
   ]
 end
 
-to store-fitness
-  ;; TODO
-  ;; create list of genome parameters with fitness
+to test-genome
+  set genome-count genome-count + 1
+  reset-environment
+  repeat ticks-per-genome [run-genome]
+end
+
+to store-genome-parent
+  let genome table:make
+  ;; TODO add all genome parameters
+  table:put genome "max-speed" max-speed
+  table:put genome "acceleration" acceleration
+  table:put genome "deceleration" deceleration
+
+  table:put genome "fitness" fitness
+  array:set parent-population (genome-count - 1) genome
+end
+
+to store-genome-child
+  let genome table:make
+  ;; TODO add all genome parameters
+  table:put genome "max-speed" max-speed
+  table:put genome "acceleration" acceleration
+  table:put genome "deceleration" deceleration
+
+  table:put genome "fitness" fitness
+  array:set child-population (genome-count - 1) genome
+end
+
+to-report fitness
+  report (mean [current-speed] of turtles) - (crashed-cars / ticks)
 end
 
 to run-genome
-  ;; if all cars are crashed, stop the simulation
-  ;;if (count (turtles with [crashed? = 0]) = 0) [ ;; TODO or ticks >= ticksmax?
-  ;;  stop
-  ;;]
   ;; first let all non-crashed cars check surroundings and decide on action
   ask turtles with [crashed? = 0] [
     ;; car checks surroundings: speed, position and intention of other cars
@@ -408,16 +511,16 @@ ticks
 BUTTON
 6
 35
-87
+172
 68
-NIL
+Create initial population
 setup
 NIL
 1
 T
 OBSERVER
 NIL
-S
+C
 NIL
 NIL
 1
@@ -425,26 +528,26 @@ NIL
 BUTTON
 7
 74
-87
+172
 107
-go
+Evolve
 run-simulation
 T
 1
 T
 OBSERVER
 NIL
-G
+E
 NIL
 NIL
 0
 
 BUTTON
-95
-35
-173
-68
-go once
+6
+115
+171
+148
+Evolve 1 generation
 run-simulation
 NIL
 1
@@ -457,10 +560,10 @@ NIL
 1
 
 MONITOR
-556
-254
-670
-299
+520
+303
+608
+348
 Average speed
 (mean [current-speed] of turtles)
 2
@@ -468,10 +571,10 @@ Average speed
 11
 
 SLIDER
-8
-133
-170
-166
+7
+180
+171
+213
 number-of-cars
 number-of-cars
 0
@@ -491,7 +594,7 @@ deceleration
 deceleration
 0
 100
-80.92
+35.33
 1
 1
 NIL
@@ -506,7 +609,7 @@ acceleration
 acceleration
 0
 100
-20.72
+59.41
 1
 1
 NIL
@@ -515,29 +618,28 @@ VERTICAL
 PLOT
 182
 254
-548
+513
 430
 Car Speeds
 Time
 Speed
 0.0
-300.0
+150.0
 0.0
 1.5
 true
 true
-"set-plot-y-range 0 ((max [speed-limit] of turtles) + .5)" ""
+"set-plot-x-range 0 ticks-per-genome" ""
 PENS
 "average" 1.0 0 -10899396 true "" "plot mean [current-speed] of turtles"
 "max" 1.0 0 -11221820 true "" "plot max [current-speed] of turtles"
 "min" 1.0 0 -13345367 true "" "plot min [current-speed] of turtles"
-"selected-car" 1.0 0 -2674135 true "" "plot [current-speed] of selected-car"
 
 MONITOR
-556
-302
-670
-347
+612
+303
+701
+348
 Crashed cars
 crashed-cars
 0
@@ -545,10 +647,10 @@ crashed-cars
 11
 
 TEXTBOX
-9
-115
-159
-133
+8
+162
+158
+180
 Settings
 11
 0.0
@@ -573,19 +675,19 @@ max-speed
 max-speed
 0
 2
-1.05
+1.17
 .01
 1
 NIL
 VERTICAL
 
 MONITOR
-556
-352
-670
-397
+552
+353
+666
+398
 Fitness
-(mean [current-speed] of turtles) - (crashed-cars / ticks)
+fitness
 5
 1
 11
@@ -601,16 +703,53 @@ Genome
 1
 
 SLIDER
-9
-176
+8
+223
 171
-209
-number-of-ticks
-number-of-ticks
+256
+ticks-per-genome
+ticks-per-genome
 0
 100
 50.0
 1
+1
+NIL
+HORIZONTAL
+
+MONITOR
+521
+255
+607
+300
+Generation
+generation-count
+0
+1
+11
+
+MONITOR
+611
+255
+701
+300
+Genome
+genome-count
+0
+1
+11
+
+SLIDER
+7
+268
+171
+301
+population-size
+population-size
+2
+20
+10.0
+2
 1
 NIL
 HORIZONTAL
