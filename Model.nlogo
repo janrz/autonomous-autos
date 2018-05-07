@@ -248,8 +248,10 @@ to run-simulation
   ;; creates two children per loop,
   ;; so repeat (population-size / 2) times
   repeat (population-size / 2) [
-    let child1 create-child-genome
-    let child2 create-child-genome
+    let parents get-parent-genomes
+    let children create-child-genomes parents
+    let child1 item 0 children
+    let child2 item 1 children
     set child1 mutate child1
     set child2 mutate child2
     ;; TODO
@@ -264,7 +266,7 @@ to run-simulation
   ;; to create new parent population
 end
 
-to-report set-genome-parameters [genome]
+to-report set-genome-parameters [ genome ]
   ;;TODO add all parameters when decided
   set max-speed table:get genome "max-speed"
   set acceleration table:get genome "acceleration"
@@ -272,27 +274,72 @@ to-report set-genome-parameters [genome]
   report 0
 end
 
-to-report mutate [genome]
+to-report mutate [ genome ]
   ;; TODO mutation with probability
   let mutated-genome genome
   report mutated-genome
 end
 
-to-report create-child-genome
-  ;; create empty genome
-  let child-genome table:make
-  ;; get two parents
-  let parent1 get-parent-genome
-  let parent2 get-parent-genome
+to-report create-child-genomes [ parents ]
+  let parent1 item 0 parents
+  let parent2 item 1 parents
+
   ;; TODO perform single-point crossover
   ;; TODO add crossed genes to child-genome
-  set child-genome parent1
-  report child-genome
+  let child1 parent1
+  let child2 parent2
+
+  report list child1 child2
 end
 
-to-report get-parent-genome
-  ;; TODO add tournament selection, now random
-  report array:item parent-population random (population-size - 1)
+to-report get-parent-genomes
+  ;; pick random genome for genome 1
+  let genome1-index random (population-size - 1)
+  let genome1 array:item parent-population genome1-index
+  let genome1-fitness table:get genome1 "fitness"
+
+  ;; create new list without previously selected genomes
+  let genome2-list array:to-list parent-population
+  set genome2-list remove-item genome1-index genome2-list
+  ;; pick random genome for genome 2
+  let genome2-index random (population-size - 2)
+  let genome2 item genome2-index genome2-list
+  let genome2-fitness table:get genome2 "fitness"
+
+  ;; create new list without previously selected genomes
+  let genome3-list remove-item genome2-index genome2-list
+  ;; pick random genome for genome 3
+  let genome3-index random (population-size - 3)
+  let genome3 item genome3-index genome3-list
+  let genome3-fitness table:get genome3 "fitness"
+
+  ;; create new list without previously selected genomes
+  let genome4-list remove-item genome3-index genome3-list
+  ;; pick random genome for genome 4
+  let genome4-index random (population-size - 4)
+  let genome4 item genome4-index genome4-list
+  let genome4-fitness table:get genome4 "fitness"
+
+  ;; choose genome from genomes 1 and 2 with highest fitness
+  ;; to become parent 1
+  let parent1 nobody
+  ifelse genome1-fitness > genome2-fitness [
+    set parent1 genome1
+  ] [
+    set parent1 genome2
+  ]
+
+  ;; choose genome from genomes 2 and 4 with highest fitness
+  ;; to become parent 2
+  let parent2 nobody
+  ifelse genome3-fitness > genome4-fitness [
+    set parent2 genome3
+  ] [
+    set parent2 genome4
+  ]
+
+  ;; return parents
+  report list parent1 parent2
 end
 
 to test-genome
@@ -587,7 +634,7 @@ NIL
 1
 NIL
 NIL
-1
+0
 
 MONITOR
 520
@@ -618,13 +665,13 @@ HORIZONTAL
 SLIDER
 278
 460
-315
+311
 610
 deceleration
 deceleration
 0
 100
-35.33
+49.42
 1
 1
 NIL
@@ -633,13 +680,13 @@ VERTICAL
 SLIDER
 230
 460
-267
+263
 610
 acceleration
 acceleration
 0
 100
-59.41
+63.46
 1
 1
 NIL
@@ -699,13 +746,13 @@ Run commands
 SLIDER
 182
 460
-219
+215
 610
 max-speed
 max-speed
 0
 2
-1.17
+1.47
 .01
 1
 NIL
