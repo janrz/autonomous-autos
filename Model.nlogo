@@ -262,8 +262,8 @@ to run-simulation
     test-genome
     store-genome-child
   ]
-  ;; TODO combine child and parent population
-  ;; to create new parent population
+
+  set parent-population child-population
 end
 
 to-report set-genome-parameters [ genome ]
@@ -275,16 +275,36 @@ to-report set-genome-parameters [ genome ]
 end
 
 to-report mutate [ genome ]
-  ;; TODO mutation with probability
   let mutated-genome genome
+  if random-float 100.0 < mutation-rate [
+    ;; TODO decide how something is mutated
+
+    ;; pick random parameter
+    let parameter-to-mutate-index random ((length table:to-list genome) - 1)
+
+    ;; TODO mutate parameter with previously
+    ;; chosen index
+  ]
   report mutated-genome
 end
 
 to-report create-child-genomes [ parents ]
+  ;; split list into separate variables
   let parent1 item 0 parents
   let parent2 item 1 parents
 
-  ;; TODO perform single-point crossover
+  ;; remove fitness from genomes before
+  ;; crossover; fitness shouldn't be passed on
+  table:remove parent1 "fitness"
+  table:remove parent2 "fitness"
+
+  ;; set crossover point and get indices for both parts
+  let crossover-point round (length (table:to-list parent1) / 2)
+  let parameters-before-crossover n-values crossover-point [ i -> i ]
+  let parameters-after-crossover n-values (length (table:to-list parent1) - length parameters-before-crossover) [ i -> i + length parameters-before-crossover ]
+
+  ;; TODO get values from table by index and crossover
+
   ;; TODO add crossed genes to child-genome
   let child1 parent1
   let child2 parent2
@@ -671,7 +691,7 @@ deceleration
 deceleration
 0
 100
-49.42
+20.74
 1
 1
 NIL
@@ -686,7 +706,7 @@ acceleration
 acceleration
 0
 100
-63.46
+16.75
 1
 1
 NIL
@@ -752,7 +772,7 @@ max-speed
 max-speed
 0
 2
-1.47
+1.37
 .01
 1
 NIL
@@ -827,6 +847,21 @@ population-size
 20
 10.0
 2
+1
+NIL
+HORIZONTAL
+
+SLIDER
+7
+314
+173
+347
+mutation-rate
+mutation-rate
+0
+100
+0.01
+.01
 1
 NIL
 HORIZONTAL
