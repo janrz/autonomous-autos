@@ -254,7 +254,6 @@ to run-simulation
     let child2 item 1 children
     set child1 mutate child1
     set child2 mutate child2
-    ;; TODO
     let dummy set-genome-parameters child1
     test-genome
     store-genome-child
@@ -262,7 +261,6 @@ to run-simulation
     test-genome
     store-genome-child
   ]
-
   set parent-population child-population
 end
 
@@ -277,13 +275,10 @@ end
 to-report mutate [ genome ]
   let mutated-genome genome
   if random-float 100.0 < mutation-rate [
-    ;; TODO decide how something is mutated
-
     ;; pick random parameter
     let parameter-to-mutate-index random ((length table:to-list genome) - 1)
 
-    ;; TODO mutate parameter with previously
-    ;; chosen index
+    ;; TODO mutate parameter with previously chosen index
   ]
   report mutated-genome
 end
@@ -293,16 +288,17 @@ to-report create-child-genomes [ parents ]
   let parent1 item 0 parents
   let parent2 item 1 parents
 
-  ;; remove fitness from genomes before
-  ;; crossover; fitness shouldn't be passed on
-  table:remove parent1 "fitness"
-  table:remove parent2 "fitness"
-
   ;; set crossover point and get indices for both parts
-  let crossover-point round (length (table:to-list parent1) / 2)
-  let parameters-before-crossover n-values crossover-point [ i -> i ]
-  let parameters-after-crossover n-values (length (table:to-list parent1) - length parameters-before-crossover) [ i -> i + length parameters-before-crossover ]
-
+  ;; (index -1 to ignore last parameter, which is fitness)
+  let crossover-point round ((length (table:to-list parent1) / 2) - 1)
+  let parameters-before-crossover
+    n-values crossover-point [ i -> i ]
+  let parameters-after-crossover
+    n-values (
+      (length (table:to-list parent1) - 1) - length parameters-before-crossover
+    ) [
+        i -> i + length parameters-before-crossover
+    ]
   ;; TODO get values from table by index and crossover
 
   ;; TODO add crossed genes to child-genome
@@ -313,14 +309,17 @@ to-report create-child-genomes [ parents ]
 end
 
 to-report get-parent-genomes
+  ;; convert parent-population from array to list
+  ;; to allow removal of items
+  let genome1-list array:to-list parent-population
+
   ;; pick random genome for genome 1
   let genome1-index random (population-size - 1)
-  let genome1 array:item parent-population genome1-index
+  let genome1 item genome1-index genome1-list
   let genome1-fitness table:get genome1 "fitness"
 
   ;; create new list without previously selected genomes
-  let genome2-list array:to-list parent-population
-  set genome2-list remove-item genome1-index genome2-list
+  let genome2-list remove-item genome1-index genome1-list
   ;; pick random genome for genome 2
   let genome2-index random (population-size - 2)
   let genome2 item genome2-index genome2-list
@@ -691,7 +690,7 @@ deceleration
 deceleration
 0
 100
-20.74
+50.24
 1
 1
 NIL
@@ -706,7 +705,7 @@ acceleration
 acceleration
 0
 100
-16.75
+84.43
 1
 1
 NIL
@@ -772,7 +771,7 @@ max-speed
 max-speed
 0
 2
-1.37
+1.11
 .01
 1
 NIL
