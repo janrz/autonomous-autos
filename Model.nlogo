@@ -322,10 +322,33 @@ to-report create-child-genomes [ parents ]
         i -> i + length parameters-before-crossover
     ]
   ;; TODO get values from table by index and crossover
-
-  ;; TODO add crossed genes to child-genome
   let child1 parent1
   let child2 parent2
+
+  let parent1list table:to-list parent1
+  let child1list table:to-list child1
+
+  let parent2list table:to-list parent1
+  let child2list table:to-list child2
+
+  foreach parent1list [
+    ;; if parameter index is in parameters after crossover
+    x -> if (member? (position x parent1list) parameters-after-crossover) [
+      ;; replace parameters after crossover in child2 with parameters from parent1
+      set child2list replace-item (position x parent1list) child2list (item (position x parent1list) parent1list)
+    ]
+  ]
+
+  foreach parent2list [
+    ;; if parameter index is in parameters after crossover
+    x -> if (member? (position x parent2list) parameters-after-crossover) [
+      ;; replace parameters after crossover in child1 with parameters from parent2
+      set child1list replace-item (position x parent2list) child1list (item (position x parent2list) parent1list)
+    ]
+  ]
+
+  set child1 table:from-list child1list
+  set child2 table:from-list child2list
 
   report list child1 child2
 end
@@ -712,7 +735,7 @@ deceleration
 deceleration
 0
 100
-60.76
+65.37
 1
 1
 NIL
@@ -727,7 +750,7 @@ acceleration
 acceleration
 0
 100
-52.49
+49.24
 1
 1
 NIL
@@ -793,7 +816,7 @@ max-speed
 max-speed
 0
 2
-0.0
+1.1
 .01
 1
 NIL
