@@ -290,7 +290,10 @@ to-report create-child-genomes [ parents ]
 
   ;; set crossover point and get indices for both parts
   ;; (index -1 to ignore last parameter, which is fitness)
-  let crossover-point round ((length (table:to-list parent1) / 2) - 1)
+  let crossover-point
+    (length (table:to-list parent1) - 1)
+    - 1
+    - random ((length (table:to-list parent1) - 1) - 1)
   let parameters-before-crossover
     n-values crossover-point [ i -> i ]
   let parameters-after-crossover
@@ -690,7 +693,7 @@ deceleration
 deceleration
 0
 100
-50.24
+14.56
 1
 1
 NIL
@@ -705,7 +708,7 @@ acceleration
 acceleration
 0
 100
-84.43
+92.85
 1
 1
 NIL
@@ -771,7 +774,7 @@ max-speed
 max-speed
 0
 2
-1.11
+0.96
 .01
 1
 NIL
