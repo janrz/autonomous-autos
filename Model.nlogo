@@ -274,11 +274,30 @@ end
 
 to-report mutate [ genome ]
   let mutated-genome genome
-  if random-float 100.0 < mutation-rate [
+  if random-float 100.0 <= mutation-rate [
     ;; pick random parameter
     let parameter-to-mutate-index random ((length table:to-list genome) - 1)
-
-    ;; TODO mutate parameter with previously chosen index
+    ;; get parameter key from index
+    let genome-parameter-to-mutate
+      item 0
+        item parameter-to-mutate-index table:to-list genome
+    ;; get parameter value from key
+    let genome-parameter-value
+      table:get genome genome-parameter-to-mutate
+    ;; randomize value
+    let genome-parameter-mutated-value
+      precision (
+        genome-parameter-value + 25 - random-float 50
+      ) 2
+    ;; keep parameter within boundaries
+    if genome-parameter-mutated-value < .0 [
+      set genome-parameter-mutated-value .0
+    ]
+    if genome-parameter-mutated-value > 100.0 [
+      set genome-parameter-mutated-value 100.0
+    ]
+    ;; replace parameter with mutated parameter
+    table:put genome genome-parameter-to-mutate genome-parameter-mutated-value
   ]
   report mutated-genome
 end
@@ -693,7 +712,7 @@ deceleration
 deceleration
 0
 100
-14.56
+60.76
 1
 1
 NIL
@@ -708,7 +727,7 @@ acceleration
 acceleration
 0
 100
-92.85
+52.49
 1
 1
 NIL
@@ -774,7 +793,7 @@ max-speed
 max-speed
 0
 2
-0.96
+0.0
 .01
 1
 NIL
@@ -862,7 +881,7 @@ mutation-rate
 mutation-rate
 0
 100
-0.01
+10.6
 .01
 1
 NIL
