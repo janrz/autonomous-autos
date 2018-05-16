@@ -3,6 +3,12 @@ extensions [array table]
 ;; VARIABLES
 ;; These variables all apply to only one car
 turtles-own [
+  ;; Initial variables for each generation, randomly generated
+  ;; during setup of first generation
+  initial-xcor
+  initial-ycor
+  initial-speed
+
   ;; Variables that other cars have access to
   current-speed        ;; the current speed of the car
                        ;; xcor is included
@@ -125,6 +131,8 @@ to setup
   draw-road
   ;; give cars their shape
   set-default-shape turtles car-shape
+  clear-turtles
+  create-turtles number-of-cars [ setup-cars ]
   ;; reset environment for next genome
   reset-environment
   ;; reset generation counter
@@ -139,8 +147,7 @@ to reset-environment
   ;; reset plot
   clear-plot
   ;; create cars
-  clear-turtles
-  create-turtles number-of-cars [ setup-cars ]
+  ask turtles [ reset-cars ]
   ;; reset tick counter
   reset-ticks
 end
@@ -177,15 +184,38 @@ end
 to setup-cars
   ;; Color car
   set color black
-  ;; Give each car random xcor and ycor of random lane
-  setxy random-xcor one-of lane-coordinates
+  ;; Set initial coordinates for all generations
+  set initial-xcor random-xcor
+  set initial-ycor one-of lane-coordinates
+  ;; Place car on initial coordinates
+  setxy initial-xcor initial-ycor
   ;; Set heading
   set heading car-heading
-  ;; Initial speed for all cars is set
-  set current-speed (
+  ;; Set initial speed for all generations
+  set initial-speed (
     (initial-speed-constant +
       random-float initial-speed-variable
     ) / 100)
+  ;; Initial speed for all generations is set
+  set current-speed initial-speed
+  ;; reset car information
+  reset-car-information
+  ;; Create table to be filled with surrounding cars data
+  set surrounding-cars table:make
+  ;; Make sure no two cars are on the same patch
+  loop [ ifelse any? other turtles-here [ fd 1 ] [ stop ] ]
+end
+
+to reset-cars
+  setxy initial-xcor initial-ycor
+  set current-speed initial-speed
+  reset-car-information
+  table:clear surrounding-cars
+  set crashed? 0
+  set color black
+end
+
+to reset-car-information
   ;; Put public variables in table car-information
   set car-information table:make
   table:put car-information "current-speed" current-speed
@@ -195,12 +225,6 @@ to setup-cars
   table:put car-information "desired-speed" -1
   ;; set desired-lane to non-existing lane
   table:put car-information "desired-lane" -10
-
-  ;; Create table to be filled with surrounding cars data
-  set surrounding-cars table:make
-
-  ;; Make sure no two cars are on the same patch
-  loop [ ifelse any? other turtles-here [ fd 1 ] [ stop ] ]
 end
 
 ;; EVOLUTIONARY ALGORITHM
@@ -735,7 +759,7 @@ deceleration
 deceleration
 0
 100
-65.37
+10.46
 1
 1
 NIL
@@ -750,7 +774,7 @@ acceleration
 acceleration
 0
 100
-49.24
+22.52
 1
 1
 NIL
@@ -816,7 +840,7 @@ max-speed
 max-speed
 0
 2
-1.1
+0.62
 .01
 1
 NIL
