@@ -71,7 +71,7 @@ globals [
   relative-rear
 
   ;; Genome boundaries
-  ;; TODO add as needed
+  ;; TODO add while definitive list of parameters unknown
   max-speed-max
   max-speed-min
   acceleration-max
@@ -289,7 +289,7 @@ to run-simulation
 end
 
 to-report set-genome-parameters [ genome ]
-  ;;TODO add all parameters when decided
+  ;; TODO add while definitive list of parameters unknown
   set max-speed table:get genome "max-speed"
   set acceleration table:get genome "acceleration"
   set deceleration table:get genome "deceleration"
@@ -345,16 +345,19 @@ to-report create-child-genomes [ parents ]
     ) [
         i -> i + length parameters-before-crossover
     ]
-  ;; TODO get values from table by index and crossover
+  ;; set children equal to parents
   let child1 parent1
   let child2 parent2
 
+  ;; convert tables with parameters
+  ;; to lists for crossover
   let parent1list table:to-list parent1
   let child1list table:to-list child1
 
   let parent2list table:to-list parent1
   let child2list table:to-list child2
 
+  ;; crossover for child 2
   foreach parent1list [
     ;; if parameter index is in parameters after crossover
     x -> if (member? (position x parent1list) parameters-after-crossover) [
@@ -363,6 +366,7 @@ to-report create-child-genomes [ parents ]
     ]
   ]
 
+  ;; crossover for child 2
   foreach parent2list [
     ;; if parameter index is in parameters after crossover
     x -> if (member? (position x parent2list) parameters-after-crossover) [
@@ -371,9 +375,11 @@ to-report create-child-genomes [ parents ]
     ]
   ]
 
+  ;; convert lists back to tables
   set child1 table:from-list child1list
   set child2 table:from-list child2list
 
+  ;; return children
   report list child1 child2
 end
 
@@ -438,7 +444,7 @@ end
 
 to store-genome-parent
   let genome table:make
-  ;; TODO add all genome parameters
+  ;; TODO add while definitive list of parameters unknown
   table:put genome "max-speed" max-speed
   table:put genome "acceleration" acceleration
   table:put genome "deceleration" deceleration
@@ -449,7 +455,7 @@ end
 
 to store-genome-child
   let genome table:make
-  ;; TODO add all genome parameters
+  ;; TODO add while definitive list of parameters unknown
   table:put genome "max-speed" max-speed
   table:put genome "acceleration" acceleration
   table:put genome "deceleration" deceleration
@@ -759,7 +765,7 @@ deceleration
 deceleration
 0
 100
-10.46
+1.51
 1
 1
 NIL
@@ -774,7 +780,7 @@ acceleration
 acceleration
 0
 100
-22.52
+29.1
 1
 1
 NIL
@@ -840,7 +846,7 @@ max-speed
 max-speed
 0
 2
-0.62
+2.67
 .01
 1
 NIL
