@@ -56,6 +56,8 @@ globals [
   road-lane-separator-2-x-distance
   road-background-color
   lane-coordinates
+  left-lane-ycor
+  right-lane-ycor
 
   ;; Car information
   car-shape
@@ -98,6 +100,8 @@ to set-constants
   set road-lane-separator-2-x-distance -3
   set road-background-color green
   set lane-coordinates [-4 0 4]
+  set left-lane-ycor 4
+  set right-lane-ycor -4
 
   set max-speed-max 1.5
   set max-speed-min .6
@@ -144,8 +148,6 @@ end
 to reset-environment
   ;; reset collision counter
   set crashed-cars 0
-  ;; reset plot
-  clear-plot
   ;; create cars
   ask turtles [ reset-cars ]
   ;; reset tick counter
@@ -440,6 +442,7 @@ to test-genome
   set genome-count genome-count + 1
   reset-environment
   repeat ticks-per-genome [run-genome]
+  plot fitness
 end
 
 to store-genome-parent
@@ -599,7 +602,44 @@ to make-decision
   ]
 
   ;; make decision
+  ifelse (car-front = false) [
+    speed-up
+  ] [
+    ifelse (ycor < left-lane-ycor and
+            car-left = false and
+         (car-front-left = false or (
+             car-front-left != false and
+             table:get car-front-left "current-speed" >= current-speed
+             )
+         ) and
+         (car-rear-left = false or (
+             car-rear-left != false and
+             table:get car-rear-left "current-speed" <= current-speed
+             )
+         )
+      ) [
+      move-left
+    ] [
+      ifelse (ycor > right-lane-ycor and
+              car-right = false and
+         (car-front-right = false or (
+             car-front-right != false and
+             table:get car-front-right "current-speed" >= current-speed
+             )
+         ) and
+         (car-rear-right = false or (
+             car-rear-right != false and
+             table:get car-rear-right "current-speed" <= current-speed
+             )
+         )
+      ) [
+      move-right
+    ] [
+        slow-down
+    ]
 
+  ]
+  ]
 end
 
 ;; VEHICLE PROCEDURES - MOVE
@@ -765,7 +805,7 @@ deceleration
 deceleration
 0
 100
-1.51
+90.03
 1
 1
 NIL
@@ -780,31 +820,11 @@ acceleration
 acceleration
 0
 100
-29.1
+63.49
 1
 1
 NIL
 VERTICAL
-
-PLOT
-182
-254
-513
-430
-Car Speeds
-Time
-Speed
-0.0
-150.0
-0.0
-1.5
-true
-true
-"set-plot-x-range 0 ticks-per-genome" ""
-PENS
-"average" 1.0 0 -10899396 true "" "plot mean [current-speed] of turtles"
-"max" 1.0 0 -11221820 true "" "plot max [current-speed] of turtles"
-"min" 1.0 0 -13345367 true "" "plot min [current-speed] of turtles"
 
 MONITOR
 612
@@ -846,7 +866,7 @@ max-speed
 max-speed
 0
 2
-2.67
+0.96
 .01
 1
 NIL
@@ -939,6 +959,24 @@ mutation-rate
 1
 NIL
 HORIZONTAL
+
+PLOT
+181
+255
+511
+430
+Fitness per genome
+NIL
+NIL
+1.0
+10.0
+0.0
+2.0
+true
+false
+"" ""
+PENS
+"fitness" 1.0 0 -13345367 true "" ""
 
 @#$#@#$#@
 ## WHAT IS IT?
