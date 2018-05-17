@@ -84,6 +84,9 @@ globals [
   ;; Genome storing
   parent-population
   child-population
+
+  ;; Other global variables
+  max-speed-multiplier
 ]
 
 ;; CONSTANTS
@@ -103,12 +106,12 @@ to set-constants
   set left-lane-ycor 4
   set right-lane-ycor -4
 
-  set max-speed-max 1.5
-  set max-speed-min .6
+  set max-speed-max 100
+  set max-speed-min 0
   set acceleration-max 100
-  set acceleration-min 10
+  set acceleration-min 0
   set deceleration-max 100
-  set deceleration-min 10
+  set deceleration-min 0
 
   ;; Car information
   set car-shape "car"
@@ -123,6 +126,9 @@ to set-constants
   set relative-right -4
   set relative-here 0
   set relative-rear -1
+
+  ;; Other global variables
+  set max-speed-multiplier 1.3
 end
 
 ;; INITIAL SETUP
@@ -649,7 +655,7 @@ end
 
 ;; VEHICLE PROCEDURES - SPEED UP
 to speed-up
-  if current-speed < max-speed [
+  if current-speed < (max-speed * max-speed-multiplier) [
     set current-speed (current-speed + (acceleration / 1000))
   ]
 end
@@ -805,7 +811,7 @@ deceleration
 deceleration
 0
 100
-90.03
+14.95
 1
 1
 NIL
@@ -820,7 +826,7 @@ acceleration
 acceleration
 0
 100
-63.49
+24.72
 1
 1
 NIL
@@ -865,9 +871,9 @@ SLIDER
 max-speed
 max-speed
 0
-2
-0.96
-.01
+100
+98.85
+1
 1
 NIL
 VERTICAL
@@ -954,7 +960,7 @@ mutation-rate
 mutation-rate
 0
 100
-10.6
+0.01
 .01
 1
 NIL
