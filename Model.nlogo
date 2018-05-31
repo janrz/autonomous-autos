@@ -17,6 +17,7 @@ turtles-own [
   desired-lane         ;; the lane the car wants to change to
 
   crashed?             ;; boolean, true if car collided with another car
+  time-passed-since-last-move
 
   ;; table containing above information
   ;; [ current-speed xcor ycor desired-speed desired-lane ]
@@ -80,6 +81,9 @@ globals [
   acceleration-min
   deceleration-max
   deceleration-min
+  patience-max
+  patience-min
+  base-patience
 
   ;; Genome storing
   parent-population
@@ -112,6 +116,9 @@ to set-constants
   set acceleration-min 0
   set deceleration-max 100
   set deceleration-min 0
+  set patience-max 1
+  set patience-min 0
+  set base-patience 5
 
   ;; Car information
   set car-shape "car"
@@ -206,6 +213,7 @@ to setup-cars
     ) / 100)
   ;; Initial speed for all generations is set
   set current-speed initial-speed
+  set time-passed-since-last-move 0
   ;; reset car information
   reset-car-information
   ;; Create table to be filled with surrounding cars data
@@ -270,6 +278,11 @@ to set-random-genome
       deceleration-min +
       random-float (deceleration-max - deceleration-min)
     ) 2
+  set patience-coefficient
+    precision (
+      patience-min +
+      random-float (patience-max - patience-min)
+    ) 2
 end
 
 ;; EVOLUTION LOOP
@@ -301,6 +314,7 @@ to-report set-genome-parameters [ genome ]
   set max-speed table:get genome "max-speed"
   set acceleration table:get genome "acceleration"
   set deceleration table:get genome "deceleration"
+  set patience-coefficient table:get genome "patience"
   report 0
 end
 
@@ -457,6 +471,7 @@ to store-genome-parent
   table:put genome "max-speed" max-speed
   table:put genome "acceleration" acceleration
   table:put genome "deceleration" deceleration
+  table:put genome "patience" patience-coefficient
 
   table:put genome "fitness" fitness
   array:set parent-population (genome-count - 1) genome
@@ -468,6 +483,7 @@ to store-genome-child
   table:put genome "max-speed" max-speed
   table:put genome "acceleration" acceleration
   table:put genome "deceleration" deceleration
+  table:put genome "patience" patience-coefficient
 
   table:put genome "fitness" fitness
   array:set child-population (genome-count - 1) genome
@@ -611,7 +627,8 @@ to make-decision
   ifelse (car-front = false) [
     speed-up
   ] [
-    ifelse (ycor < left-lane-ycor and
+    ifelse (time-passed-since-last-move > round (patience-coefficient * base-patience) and
+            ycor < left-lane-ycor and
             car-left = false and
          (car-front-left = false or (
              car-front-left != false and
@@ -625,8 +642,10 @@ to make-decision
          )
       ) [
       move-left
+      set time-passed-since-last-move 0
     ] [
-      ifelse (ycor > right-lane-ycor and
+      ifelse (time-passed-since-last-move > round (patience-coefficient * base-patience) and
+              ycor > right-lane-ycor and
               car-right = false and
          (car-front-right = false or (
              car-front-right != false and
@@ -640,12 +659,14 @@ to make-decision
          )
       ) [
       move-right
+      set time-passed-since-last-move 0
     ] [
         slow-down
     ]
 
   ]
   ]
+  set time-passed-since-last-move time-passed-since-last-move + 1
 end
 
 ;; VEHICLE PROCEDURES - MOVE
@@ -811,7 +832,7 @@ deceleration
 deceleration
 0
 100
-14.95
+86.65
 1
 1
 NIL
@@ -826,7 +847,7 @@ acceleration
 acceleration
 0
 100
-24.72
+83.82
 1
 1
 NIL
@@ -872,7 +893,7 @@ max-speed
 max-speed
 0
 100
-98.85
+34.29
 1
 1
 NIL
@@ -983,6 +1004,21 @@ false
 "" ""
 PENS
 "fitness" 1.0 0 -13345367 true "" ""
+
+SLIDER
+324
+461
+361
+655
+patience-coefficient
+patience-coefficient
+0
+1
+0.24
+.01
+1
+NIL
+VERTICAL
 
 @#$#@#$#@
 ## WHAT IS IT?
