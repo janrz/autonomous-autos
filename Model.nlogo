@@ -938,9 +938,9 @@ fitness
 TEXTBOX
 182
 439
-332
-457
-Genome
+424
+469
+Genome (do not change manually)
 12
 0.0
 1
@@ -1061,67 +1061,50 @@ NIL
 VERTICAL
 
 @#$#@#$#@
-## WHAT IS IT?
+## ABOUT THE MODEL
 
-This project is a more sophisticated two-lane version of the "Traffic Basic" model.  Much like the simpler model, this model demonstrates how traffic jams can form. In the two-lane version, drivers have a new option; they can react by changing lanes, although this often does little to solve their problem.
+This project was originally a more sophisticated two-lane version of the "Traffic Basic" model by Uri Wilensky.  Much like the simpler model, this model demonstrated how traffic jams can form.
+The two-lane model by Wilensky was later expanded by Nousha van Dijk and Jan Rezelman in 2016 for the Collective Intelligence course at the VU University in Amsterdam. It was expanded to include a third lane, and simulated traffic behaviour when one of the outside lanes was closed.
 
-As in the traffic model, traffic may slow down and jam without any centralized cause.
+For this project, the model has been modified to simulate autonomous vehicle behaviour using advanced surroundings monitoring, and a genetic algorithm is included to optimize the vehicle behaviour.
 
 ## HOW TO USE IT
 
-Click on the SETUP button to set up the cars. Click on DRIVE to start the cars moving. The STEP button drives the car for just one tick of the clock.
+Buttons
 
-The NUMBER slider controls the number of cars on the road. The LOOK-AHEAD slider controls the distance that drivers look ahead (in deciding whether to slow down or change lanes). The SPEED-UP slider controls the rate at which cars accelerate when there are no cars ahead. The SLOW-DOWN slider controls the rate at which cars decelerate when there is a car close ahead.
+* Create initial population (C key): set up the cars. This creates an initial population with random genome parameters. 
+* Evolve (E key): infinitely evolve the initial population, click again to stop evolving. 
+* Evolve 1 generation (1 key): evolves the population just 1 generation.
 
-You may wish to slow down the model with the speed slider to watch the behavior of certain cars more closely.
+Sliders
 
-The SELECT-CAR button allows you to pick a car to watch. It turns the car red, so that it is easier to keep track of it. SELECT-CAR is best used while DRIVE is turned off. If the user does not select a car manually, a car is chosen at random to be the "selected car".
+* number-of-cars: controls the number of cars on the road. 
+* ticks-per-genome: controls the amount of time each genome is tested before the genome fitness is determined. 
+* population-size: controls the amount of genomes per population. 
+* mutation-rate: controls the probability of a mutation in the genome occurring.
 
-The AVERAGE-SPEED monitor displays the average speed of all the cars.
+NOTE: the slider positions under 'Genome' are determined by the algorithm and should not be changed manually.
 
-The CAR SPEEDS plot displays four quantities over time:
-- the maximum speed of any car - CYAN
-- the minimum speed of any car - BLUE
-- the average speed of all cars - GREEN
-- the speed of the selected car - RED
+Monitors
 
-## THINGS TO NOTICE
+* Generation: displays the current generation.
+* Genome: displays the current genome within the generation.
+* Average speed: displays the average speed of all the cars.
+* Crashed cars: displays the number of crashed cars in the current genome.
+* Fitness: displays the fitness for the currently evaluated genome.
 
-Traffic jams can start from small "seeds." Cars start with random positions and random speeds. If some cars are clustered together, they will move slowly, causing cars behind them to slow down, and a traffic jam forms.
+The 'Fitness per genome' plot displays the fitness for each genome over time.
 
-Even though all of the cars are moving forward, the traffic jams tend to move backwards. This behavior is common in wave phenomena: the behavior of the group is often very different from the behavior of the individuals that make up the group.
-
-Just as each car has a current speed and a maximum speed, each driver has a current patience and a maximum patience. When a driver decides to change lanes, he may not always find an opening in the lane. When his patience expires, he tries to get back in the lane he was first in. If this fails, back he goes... As he gets more 'frustrated', his patience gradually decreases over time. When the number of cars in the model is high, watch to find cars that weave in and out of lanes in this manner. This phenomenon is called "snaking" and is common in congested highways.
-
-Watch the AVERAGE-SPEED monitor, which computes the average speed of the cars. What happens to the speed over time? What is the relation between the speed of the cars and the presence (or absence) of traffic jams?
-
-Look at the two plots. Can you detect discernible patterns in the plots?
-
-## THINGS TO TRY
-
-What could you change to minimize the chances of traffic jams forming, besides just the number of cars? What is the relationship between number of cars, number of lanes, and (in this case) the length of each lane?
-
-Explore changes to the sliders SLOW-DOWN, SPEED-UP, and LOOK-AHEAD. How do these affect the flow of traffic? Can you set them so as to create maximal snaking?
-
-## EXTENDING THE MODEL
-
-Try to create a 'traffic-3 lanes', 'traffic-4 lanes', 'traffic-crossroads' (where two sets of cars might meet at a traffic light), or 'traffic-bottleneck' model (where two lanes might merge to form one lane).
-
-Note that the cars never crash into each other- a car will never enter a patch or pass through a patch containing another car. Remove this feature, and have the turtles that collide die upon collision. What will happen to such a model over time?
-
-## NETLOGO FEATURES
-
-Note the use of `mouse-down?` and `mouse-xcor`/`mouse-ycor` to enable selecting a car for special attention.
-
-Each turtle has a shape, unlike in some other models. NetLogo uses `set shape` to alter the shapes of turtles. You can, using the shapes editor in the Tools menu, create your own turtle shapes or modify existing ones. Then you can modify the code to use your own shapes.
+You may wish to slow down the model with the speed sliders to watch the behavior of certain cars more closely.
 
 ## RELATED MODELS
 
 Traffic Basic
+Traffic 2 Lanes model
 
 ## HOW TO CITE
 
-If you mention this model or the NetLogo software in a publication, we ask that you include the citations below.
+If you mention this model or the NetLogo software in a publication, we ask that you include the citations below for the original model.
 
 For the model itself:
 
@@ -1131,7 +1114,7 @@ Please cite the NetLogo software as:
 
 * Wilensky, U. (1999). NetLogo. http://ccl.northwestern.edu/netlogo/. Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
 
-## COPYRIGHT AND LICENSE
+## COPYRIGHT AND LICENSE - ORIGINAL MODEL
 
 Copyright 1998 Uri Wilensky.
 
