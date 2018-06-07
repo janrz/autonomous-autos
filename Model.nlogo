@@ -75,7 +75,6 @@ globals [
   relative-rear
 
   ;; Genome boundaries
-  ;; TODO add while definitive list of parameters unknown
   max-speed-max
   max-speed-min
   acceleration-max
@@ -322,7 +321,6 @@ to run-simulation
 end
 
 to-report set-genome-parameters [ genome ]
-  ;; TODO add while definitive list of parameters unknown
   set max-speed table:get genome "max-speed"
   set acceleration table:get genome "acceleration"
   set deceleration table:get genome "deceleration"
@@ -397,7 +395,10 @@ to-report create-child-genomes [ parents ]
     ;; if parameter index is in parameters after crossover
     x -> if (member? (position x parent1list) parameters-after-crossover) [
       ;; replace parameters after crossover in child2 with parameters from parent1
-      set child2list replace-item (position x parent1list) child2list (item (position x parent1list) parent1list)
+      set child2list
+        replace-item (position x parent1list) child2list (
+          item (position x parent1list) parent1list
+        )
     ]
   ]
 
@@ -406,7 +407,10 @@ to-report create-child-genomes [ parents ]
     ;; if parameter index is in parameters after crossover
     x -> if (member? (position x parent2list) parameters-after-crossover) [
       ;; replace parameters after crossover in child1 with parameters from parent2
-      set child1list replace-item (position x parent2list) child1list (item (position x parent2list) parent1list)
+      set child1list
+        replace-item (position x parent2list) child1list (
+          item (position x parent2list) parent1list
+        )
     ]
   ]
 
@@ -480,7 +484,7 @@ end
 
 to store-genome-parent
   let genome table:make
-  ;; TODO add while definitive list of parameters unknown
+
   table:put genome "max-speed" max-speed
   table:put genome "acceleration" acceleration
   table:put genome "deceleration" deceleration
@@ -493,7 +497,7 @@ end
 
 to store-genome-child
   let genome table:make
-  ;; TODO add while definitive list of parameters unknown
+
   table:put genome "max-speed" max-speed
   table:put genome "acceleration" acceleration
   table:put genome "deceleration" deceleration
@@ -568,7 +572,8 @@ to check-surroundings
       )
   ] [
     set front-check-counter 2
-    while [not any? turtles-at front-check-counter relative-here and front-check-counter < 25] [
+    while [not any? turtles-at front-check-counter relative-here and
+             front-check-counter < 25] [
       set front-check-counter front-check-counter + 1
     ]
     ifelse (any? turtles-at front-check-counter relative-here) [
@@ -645,7 +650,8 @@ to make-decision
     ) [
     speed-up
   ] [
-    ifelse (time-passed-since-last-move > round (patience-coefficient * base-patience) and
+    ifelse (time-passed-since-last-move > round (
+              patience-coefficient * base-patience) and
             ycor < left-lane-ycor and
             car-left = false and
          (car-front-left = false or (
@@ -662,7 +668,8 @@ to make-decision
       move-left
       set time-passed-since-last-move 0
     ] [
-      ifelse (time-passed-since-last-move > round (patience-coefficient * base-patience) and
+      ifelse (time-passed-since-last-move > round (
+                patience-coefficient * base-patience) and
               ycor > right-lane-ycor and
               car-right = false and
          (car-front-right = false or (
