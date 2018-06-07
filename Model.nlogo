@@ -32,6 +32,7 @@ turtles-own [
   car-right            ;; information about car to the right
   car-rear-left        ;; information about car to the rear left
   car-rear-right       ;; information about car to the rear right
+  car-front-distance
 
   ;; table containing above information
   ;; [ car-left car-front-left car-front car-front-right car-right ]
@@ -84,6 +85,9 @@ globals [
   patience-max
   patience-min
   base-patience
+  minimum-distance-max
+  minimum-distance-min
+  base-minimum-distance
 
   ;; Genome storing
   parent-population
@@ -119,6 +123,9 @@ to set-constants
   set patience-max 1
   set patience-min 0
   set base-patience 5
+  set minimum-distance-max 1
+  set minimum-distance-min 0
+  set base-minimum-distance 5
 
   ;; Car information
   set car-shape "car"
@@ -283,6 +290,11 @@ to set-random-genome
       patience-min +
       random-float (patience-max - patience-min)
     ) 2
+  set minimum-distance-coefficient
+    precision (
+      minimum-distance-min +
+      random-float (minimum-distance-max - minimum-distance-min)
+    ) 2
 end
 
 ;; EVOLUTION LOOP
@@ -315,6 +327,7 @@ to-report set-genome-parameters [ genome ]
   set acceleration table:get genome "acceleration"
   set deceleration table:get genome "deceleration"
   set patience-coefficient table:get genome "patience"
+  set minimum-distance-coefficient table:get genome "minimum-distance"
   report 0
 end
 
@@ -472,6 +485,7 @@ to store-genome-parent
   table:put genome "acceleration" acceleration
   table:put genome "deceleration" deceleration
   table:put genome "patience" patience-coefficient
+  table:put genome "minimum-distance" minimum-distance-coefficient
 
   table:put genome "fitness" fitness
   array:set parent-population (genome-count - 1) genome
@@ -484,6 +498,7 @@ to store-genome-child
   table:put genome "acceleration" acceleration
   table:put genome "deceleration" deceleration
   table:put genome "patience" patience-coefficient
+  table:put genome "minimum-distance" minimum-distance-coefficient
 
   table:put genome "fitness" fitness
   array:set child-population (genome-count - 1) genome
@@ -561,6 +576,7 @@ to check-surroundings
         [car-information] of (
           one-of turtles-at front-check-counter relative-here
         )
+      set car-front-distance front-check-counter
     ] [
       set car-front false
     ]
@@ -624,7 +640,9 @@ to make-decision
   ]
 
   ;; make decision
-  ifelse (car-front = false) [
+  ifelse (car-front = false or
+          car-front-distance < (minimum-distance-coefficient * base-minimum-distance)
+    ) [
     speed-up
   ] [
     ifelse (time-passed-since-last-move > round (patience-coefficient * base-patience) and
@@ -832,7 +850,7 @@ deceleration
 deceleration
 0
 100
-86.65
+84.28
 1
 1
 NIL
@@ -847,7 +865,7 @@ acceleration
 acceleration
 0
 100
-83.82
+3.75
 1
 1
 NIL
@@ -893,7 +911,7 @@ max-speed
 max-speed
 0
 100
-34.29
+90.69
 1
 1
 NIL
@@ -998,7 +1016,7 @@ NIL
 1.0
 10.0
 0.0
-2.0
+0.5
 true
 false
 "" ""
@@ -1007,14 +1025,29 @@ PENS
 
 SLIDER
 324
-461
-361
-655
+460
+357
+612
 patience-coefficient
 patience-coefficient
 0
 1
-0.24
+0.66
+.01
+1
+NIL
+VERTICAL
+
+SLIDER
+373
+460
+406
+612
+minimum-distance-coefficient
+minimum-distance-coefficient
+0
+1
+0.31
 .01
 1
 NIL
