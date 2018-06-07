@@ -75,17 +75,9 @@ globals [
   relative-rear
 
   ;; Genome boundaries
-  max-speed-max
-  max-speed-min
-  acceleration-max
-  acceleration-min
-  deceleration-max
-  deceleration-min
-  patience-max
-  patience-min
+  coefficient-max
+  coefficient-min
   base-patience
-  minimum-distance-max
-  minimum-distance-min
   base-minimum-distance
 
   ;; Genome storing
@@ -113,17 +105,9 @@ to set-constants
   set left-lane-ycor 4
   set right-lane-ycor -4
 
-  set max-speed-max 100
-  set max-speed-min 0
-  set acceleration-max 100
-  set acceleration-min 0
-  set deceleration-max 100
-  set deceleration-min 0
-  set patience-max 1
-  set patience-min 0
+  set coefficient-max 1
+  set coefficient-min 0
   set base-patience 5
-  set minimum-distance-max 1
-  set minimum-distance-min 0
   set base-minimum-distance 5
 
   ;; Car information
@@ -259,40 +243,21 @@ to create-initial-population
   set child-population array:from-list n-values population-size [0]
 
   repeat population-size [
-    set-random-genome
+    set max-speed get-random-coefficient
+    set acceleration get-random-coefficient
+    set deceleration get-random-coefficient
+    set patience-coefficient get-random-coefficient
+    set minimum-distance-coefficient get-random-coefficient
     test-genome
     store-genome-parent
   ]
 end
 
-;; set random parameters to genome for initial population
-to set-random-genome
-  ;; set all genome parameters to
-  ;; random values within parameter boundaries
-  set max-speed
+to-report get-random-coefficient
+  report
     precision (
-      max-speed-min +
-      random-float (max-speed-max - max-speed-min)
-    ) 2
-  set acceleration
-    precision (
-      acceleration-min +
-      random-float (acceleration-max - acceleration-min)
-    ) 2
-  set deceleration
-    precision (
-      deceleration-min +
-      random-float (deceleration-max - deceleration-min)
-    ) 2
-  set patience-coefficient
-    precision (
-      patience-min +
-      random-float (patience-max - patience-min)
-    ) 2
-  set minimum-distance-coefficient
-    precision (
-      minimum-distance-min +
-      random-float (minimum-distance-max - minimum-distance-min)
+      coefficient-min +
+      random-float (coefficient-max - coefficient-min)
     ) 2
 end
 
@@ -702,13 +667,13 @@ end
 ;; VEHICLE PROCEDURES - SPEED UP
 to speed-up
   if current-speed < (max-speed * max-speed-multiplier) [
-    set current-speed (current-speed + (acceleration / 1000))
+    set current-speed (current-speed + (acceleration / 10))
   ]
 end
 
 ;; VEHICLE PROCEDURES - SLOW DOWN
 to slow-down
-  set current-speed (current-speed - (deceleration / 1000))
+  set current-speed (current-speed - (deceleration / 10))
   if current-speed <= 0 [
     set current-speed 0
   ]
@@ -856,9 +821,9 @@ SLIDER
 deceleration
 deceleration
 0
-100
-84.28
 1
+0.79
+.01
 1
 NIL
 VERTICAL
@@ -871,9 +836,9 @@ SLIDER
 acceleration
 acceleration
 0
-100
-3.75
 1
+0.78
+.01
 1
 NIL
 VERTICAL
@@ -917,9 +882,9 @@ SLIDER
 max-speed
 max-speed
 0
-100
-90.69
 1
+0.51
+.01
 1
 NIL
 VERTICAL
@@ -1039,7 +1004,7 @@ patience-coefficient
 patience-coefficient
 0
 1
-0.66
+0.8
 .01
 1
 NIL
@@ -1054,7 +1019,7 @@ minimum-distance-coefficient
 minimum-distance-coefficient
 0
 1
-0.31
+0.34
 .01
 1
 NIL
