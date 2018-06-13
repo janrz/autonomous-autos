@@ -13,14 +13,12 @@ turtles-own [
   current-speed        ;; the current speed of the car
                        ;; xcor is included
                        ;; ycor is included by default
-  desired-speed        ;; the speed the car wants to change to
-  desired-lane         ;; the lane the car wants to change to
 
   crashed?             ;; boolean, true if car collided with another car
   time-passed-since-last-move
 
   ;; table containing above information
-  ;; [ current-speed xcor ycor desired-speed desired-lane ]
+  ;; [ current-speed xcor ycor ]
   car-information
 
   ;; information about surrounding cars:
@@ -227,10 +225,6 @@ to reset-car-information
   table:put car-information "current-speed" current-speed
   table:put car-information "xcor" xcor
   table:put car-information "ycor" ycor
-  ;; set desired-speed to negative number
-  table:put car-information "desired-speed" -1
-  ;; set desired-lane to non-existing lane
-  table:put car-information "desired-lane" -10
 end
 
 ;; EVOLUTIONARY ALGORITHM
@@ -699,8 +693,6 @@ to update-own-information
   table:put car-information "current-speed" current-speed
   table:put car-information "xcor" xcor
   table:put car-information "ycor" ycor
-  table:put car-information "desired-speed" desired-speed
-  table:put car-information "desired-lane" desired-lane
 end
 
 ; Copyright 1998 Uri Wilensky (original model).
@@ -822,7 +814,7 @@ deceleration
 deceleration
 0
 1
-0.79
+0.14
 .01
 1
 NIL
@@ -837,7 +829,7 @@ acceleration
 acceleration
 0
 1
-0.78
+0.31
 .01
 1
 NIL
@@ -883,7 +875,7 @@ max-speed
 max-speed
 0
 1
-0.51
+0.63
 .01
 1
 NIL
@@ -1004,7 +996,7 @@ patience-coefficient
 patience-coefficient
 0
 1
-0.8
+0.56
 .01
 1
 NIL
@@ -1019,7 +1011,7 @@ minimum-distance-coefficient
 minimum-distance-coefficient
 0
 1
-0.34
+0.37
 .01
 1
 NIL
