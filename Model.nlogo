@@ -617,7 +617,7 @@ to make-decision
 
   ;; make decision
   ifelse (car-front = false or
-          car-front-distance < (minimum-distance-coefficient * base-minimum-distance)
+          car-front-distance > (minimum-distance-coefficient * base-minimum-distance)
     ) [
     speed-up
   ] [
@@ -826,7 +826,7 @@ deceleration
 deceleration
 0
 1
-0.97
+0.94
 .01
 1
 NIL
@@ -841,7 +841,7 @@ acceleration
 acceleration
 0
 1
-0.4
+0.99
 .01
 1
 NIL
@@ -887,7 +887,7 @@ max-speed
 max-speed
 0
 1
-0.4
+0.12
 .01
 1
 NIL
@@ -923,7 +923,7 @@ ticks-per-genome
 ticks-per-genome
 0
 100
-50.0
+100.0
 1
 1
 NIL
@@ -987,8 +987,8 @@ PLOT
 511
 430
 Fitness per genome
-NIL
-NIL
+Genome number
+Fitness
 1.0
 10.0
 0.0
@@ -1008,7 +1008,7 @@ patience-coefficient
 patience-coefficient
 0
 1
-0.25
+0.0
 .01
 1
 NIL
@@ -1023,7 +1023,7 @@ minimum-distance-coefficient
 minimum-distance-coefficient
 0
 1
-0.34
+0.83
 .01
 1
 NIL
@@ -1053,7 +1053,7 @@ base-minimum-distance
 base-minimum-distance
 0
 10
-5.0
+10.0
 1
 1
 NIL
