@@ -303,14 +303,14 @@ to-report mutate [ genome ]
     ;; randomize value
     let genome-parameter-mutated-value
       precision (
-        genome-parameter-value + 25 - random-float 50
+        genome-parameter-value + .25 - random-float .50
       ) 2
     ;; keep parameter within boundaries
-    if genome-parameter-mutated-value < .0 [
-      set genome-parameter-mutated-value .0
+    if genome-parameter-mutated-value < 0 [
+      set genome-parameter-mutated-value 0
     ]
-    if genome-parameter-mutated-value > 100.0 [
-      set genome-parameter-mutated-value 100.0
+    if genome-parameter-mutated-value > 1 [
+      set genome-parameter-mutated-value 1
     ]
     ;; replace parameter with mutated parameter
     table:put genome genome-parameter-to-mutate genome-parameter-mutated-value
@@ -480,11 +480,12 @@ to run-genome
     check-surroundings
     ;; car makes decision on speed and lane: change or keep the same
     make-decision
+    move
   ]
   ;; then let all cars act upon decisions and update public information
   ask turtles with [crashed? = 0] [
     ;; car acts based on decision
-    move
+
   ]
   ask turtles [
     ;; car updates public information
@@ -799,7 +800,7 @@ number-of-cars
 number-of-cars
 0
 134
-50.0
+30.0
 1
 1
 NIL
@@ -814,7 +815,7 @@ deceleration
 deceleration
 0
 1
-0.14
+1.0
 .01
 1
 NIL
@@ -829,7 +830,7 @@ acceleration
 acceleration
 0
 1
-0.31
+0.0
 .01
 1
 NIL
@@ -875,7 +876,7 @@ max-speed
 max-speed
 0
 1
-0.63
+1.0
 .01
 1
 NIL
@@ -996,7 +997,7 @@ patience-coefficient
 patience-coefficient
 0
 1
-0.56
+1.0
 .01
 1
 NIL
@@ -1011,7 +1012,7 @@ minimum-distance-coefficient
 minimum-distance-coefficient
 0
 1
-0.37
+0.23
 .01
 1
 NIL
