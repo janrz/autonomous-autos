@@ -82,6 +82,7 @@ globals [
 
   ;; Other global variables
   max-speed-multiplier
+  best-genome-fitness
 ]
 
 ;; CONSTANTS
@@ -120,6 +121,7 @@ to set-constants
 
   ;; Other global variables
   set max-speed-multiplier 1.3
+  set best-genome-fitness -1000
 end
 
 ;; INITIAL SETUP
@@ -435,6 +437,23 @@ to test-genome
   reset-environment
   repeat ticks-per-genome [run-genome]
   plot fitness
+  if fitness > best-genome-fitness [
+    update-max-fitness
+  ]
+end
+
+to update-max-fitness
+  set best-genome-fitness fitness
+  clear-output
+  output-print (word "Best fitness: "     fitness "\n"
+                     "Generation: "       generation-count "\n"
+                     "Genome: "           genome-count "\n"
+                     "Max-speed: "        max-speed "\n"
+                     "Acceleration: "     acceleration "\n"
+                     "Deceleration: "     deceleration "\n"
+                     "Patience: "         patience-coefficient "\n"
+                     "Minimum-distance: " minimum-distance-coefficient
+  )
 end
 
 to store-genome-parent
@@ -807,7 +826,7 @@ deceleration
 deceleration
 0
 1
-0.81
+0.97
 .01
 1
 NIL
@@ -822,7 +841,7 @@ acceleration
 acceleration
 0
 1
-0.53
+0.4
 .01
 1
 NIL
@@ -868,7 +887,7 @@ max-speed
 max-speed
 0
 1
-0.49
+0.4
 .01
 1
 NIL
@@ -989,7 +1008,7 @@ patience-coefficient
 patience-coefficient
 0
 1
-0.74
+0.25
 .01
 1
 NIL
@@ -1004,7 +1023,7 @@ minimum-distance-coefficient
 minimum-distance-coefficient
 0
 1
-0.14
+0.34
 .01
 1
 NIL
@@ -1039,6 +1058,13 @@ base-minimum-distance
 1
 NIL
 HORIZONTAL
+
+OUTPUT
+521
+465
+730
+610
+12
 
 @#$#@#$#@
 ## ABOUT THE MODEL
