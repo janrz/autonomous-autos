@@ -1,8 +1,9 @@
 extensions [array table]
+breed [cars car]
 
 ;; VARIABLES
 ;; These variables all apply to only one car
-turtles-own [
+cars-own [
   ;; Initial variables for each generation, randomly generated
   ;; during setup of first generation
   initial-xcor
@@ -133,9 +134,9 @@ to setup
   ;; draw road and surroundings
   draw-road
   ;; give cars their shape
-  set-default-shape turtles car-shape
+  set-default-shape cars car-shape
   clear-turtles
-  create-turtles number-of-cars [ setup-cars ]
+  create-cars number-of-cars [ setup-cars ]
   ;; reset environment for next genome
   reset-environment
   ;; reset generation counter
@@ -148,7 +149,7 @@ to reset-environment
   ;; reset collision counter
   set crashed-cars 0
   ;; create cars
-  ask turtles [ reset-cars ]
+  ask cars [ reset-cars ]
   ;; reset tick counter
   reset-ticks
 end
@@ -205,7 +206,7 @@ to setup-cars
   ;; Create table to be filled with surrounding cars data
   set surrounding-cars table:make
   ;; Make sure no two cars are on the same patch
-  loop [ ifelse any? other turtles-here [ fd 1 ] [ stop ] ]
+  loop [ ifelse any? other cars-here [ fd 1 ] [ stop ] ]
 end
 
 to reset-cars
@@ -483,14 +484,14 @@ to store-genome-child
 end
 
 to-report fitness
-  report (mean [current-speed] of turtles) - (crashed-cars / ticks)
+  report (mean [current-speed] of cars) - (crashed-cars / ticks)
 end
 
 ;; Run genome one step in time, called multiple
 ;; times to test genome behaviour
 to run-genome
   ;; first let all non-crashed cars check surroundings and decide on action
-  ask turtles with [crashed? = 0] [
+  ask cars with [crashed? = 0] [
     ;; car checks surroundings: speed, position and intention of other cars
     check-surroundings
     ;; car makes decision on speed and lane: change or keep the same
@@ -498,13 +499,13 @@ to run-genome
     ;; car makes decided move
     move
   ]
-  ask turtles [
+  ask cars [
     ;; car updates public information
     update-own-information
   ]
   ask patches [
-    if count turtles-here > 1 [
-      ask turtles-here [
+    if count cars-here > 1 [
+      ask cars-here [
         crash
       ]
     ]
@@ -516,41 +517,41 @@ end
 to check-surroundings
   ;; check if any cars are directly to the left of the current car and if so,
   ;; get their information
-  ifelse (any? turtles-at relative-here relative-left) [
+  ifelse (any? cars-at relative-here relative-left) [
     set car-left
       [car-information] of (
-        one-of turtles-at relative-here relative-left
+        one-of cars-at relative-here relative-left
       )
   ] [
     set car-left false
   ]
   ;; check if any cars are to the front-left of the current car and if so,
   ;; get their information
-  ifelse (any? turtles-at relative-front relative-left) [
+  ifelse (any? cars-at relative-front relative-left) [
     set car-front-left
       [car-information] of (
-        one-of turtles-at relative-front relative-left
+        one-of cars-at relative-front relative-left
       )
   ] [
     set car-front-left false
   ]
   ;; check if any cars are directly in front of the current car and if so,
   ;; get their information
-  ifelse (any? turtles-at relative-front relative-here) [
+  ifelse (any? cars-at relative-front relative-here) [
     set car-front
       [car-information] of (
-        one-of turtles-at relative-front relative-here
+        one-of cars-at relative-front relative-here
       )
   ] [
     set front-check-counter 2
-    while [not any? turtles-at front-check-counter relative-here and
+    while [not any? cars-at front-check-counter relative-here and
              front-check-counter < 25] [
       set front-check-counter front-check-counter + 1
     ]
-    ifelse (any? turtles-at front-check-counter relative-here) [
+    ifelse (any? cars-at front-check-counter relative-here) [
       set car-front
         [car-information] of (
-          one-of turtles-at front-check-counter relative-here
+          one-of cars-at front-check-counter relative-here
         )
       set car-front-distance front-check-counter
     ] [
@@ -559,40 +560,40 @@ to check-surroundings
   ]
   ;; check if any cars are to the front-right of the current car and if so,
   ;; get their information
-  ifelse (any? turtles-at relative-front relative-right) [
+  ifelse (any? cars-at relative-front relative-right) [
     set car-front-right
       [car-information] of (
-        one-of turtles-at relative-front relative-right
+        one-of cars-at relative-front relative-right
       )
   ] [
     set car-front-right false
   ]
   ;; check if any cars are directly to the right of the current car and if so,
   ;; get their information
-  ifelse (any? turtles-at relative-here relative-right) [
+  ifelse (any? cars-at relative-here relative-right) [
     set car-right
       [car-information] of (
-        one-of turtles-at relative-here relative-right
+        one-of cars-at relative-here relative-right
       )
   ] [
     set car-right false
   ]
   ;; check if any cars are to the rear-left of the current car and if so,
   ;; get their information
-  ifelse (any? turtles-at relative-rear relative-left) [
+  ifelse (any? cars-at relative-rear relative-left) [
     set car-rear-left
       [car-information] of (
-        one-of turtles-at relative-rear relative-left
+        one-of cars-at relative-rear relative-left
       )
   ] [
     set car-rear-left false
   ]
   ;; check if any cars are to the rear-right of the current car and if so,
   ;; get their information
-  ifelse (any? turtles-at relative-rear relative-right) [
+  ifelse (any? cars-at relative-rear relative-right) [
     set car-rear-right
       [car-information] of (
-        one-of turtles-at relative-rear relative-right
+        one-of cars-at relative-rear relative-right
       )
   ] [
     set car-rear-right false
@@ -826,7 +827,7 @@ deceleration
 deceleration
 0
 1
-0.94
+0.91
 .01
 1
 NIL
@@ -841,7 +842,7 @@ acceleration
 acceleration
 0
 1
-0.99
+0.84
 .01
 1
 NIL
@@ -887,7 +888,7 @@ max-speed
 max-speed
 0
 1
-0.12
+0.31
 .01
 1
 NIL
@@ -923,7 +924,7 @@ ticks-per-genome
 ticks-per-genome
 0
 100
-100.0
+50.0
 1
 1
 NIL
@@ -1008,7 +1009,7 @@ patience-coefficient
 patience-coefficient
 0
 1
-0.0
+0.21
 .01
 1
 NIL
@@ -1023,7 +1024,7 @@ minimum-distance-coefficient
 minimum-distance-coefficient
 0
 1
-0.83
+0.46
 .01
 1
 NIL
@@ -1038,7 +1039,7 @@ base-patience
 base-patience
 0
 10
-5.0
+10.0
 1
 1
 NIL
@@ -1053,7 +1054,7 @@ base-minimum-distance
 base-minimum-distance
 0
 10
-10.0
+5.0
 1
 1
 NIL
