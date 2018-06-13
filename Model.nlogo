@@ -75,8 +75,6 @@ globals [
   ;; Genome boundaries
   coefficient-max
   coefficient-min
-  base-patience
-  base-minimum-distance
 
   ;; Genome storing
   parent-population
@@ -105,8 +103,6 @@ to set-constants
 
   set coefficient-max 1
   set coefficient-min 0
-  set base-patience 5
-  set base-minimum-distance 5
 
   ;; Car information
   set car-shape "car"
@@ -480,12 +476,8 @@ to run-genome
     check-surroundings
     ;; car makes decision on speed and lane: change or keep the same
     make-decision
+    ;; car makes decided move
     move
-  ]
-  ;; then let all cars act upon decisions and update public information
-  ask turtles with [crashed? = 0] [
-    ;; car acts based on decision
-
   ]
   ask turtles [
     ;; car updates public information
@@ -800,7 +792,7 @@ number-of-cars
 number-of-cars
 0
 134
-30.0
+50.0
 1
 1
 NIL
@@ -815,7 +807,7 @@ deceleration
 deceleration
 0
 1
-1.0
+0.81
 .01
 1
 NIL
@@ -830,7 +822,7 @@ acceleration
 acceleration
 0
 1
-0.0
+0.53
 .01
 1
 NIL
@@ -876,7 +868,7 @@ max-speed
 max-speed
 0
 1
-1.0
+0.49
 .01
 1
 NIL
@@ -997,7 +989,7 @@ patience-coefficient
 patience-coefficient
 0
 1
-1.0
+0.74
 .01
 1
 NIL
@@ -1012,11 +1004,41 @@ minimum-distance-coefficient
 minimum-distance-coefficient
 0
 1
-0.23
+0.14
 .01
 1
 NIL
 VERTICAL
+
+SLIDER
+7
+361
+173
+394
+base-patience
+base-patience
+0
+10
+5.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+7
+410
+175
+443
+base-minimum-distance
+base-minimum-distance
+0
+10
+5.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## ABOUT THE MODEL
