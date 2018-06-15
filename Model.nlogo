@@ -449,6 +449,7 @@ to update-max-fitness
   output-print (word "Best fitness: "     fitness "\n"
                      "Generation: "       generation-count "\n"
                      "Genome: "           genome-count "\n"
+                     "Crashed cars: "     crashed-cars "\n"
                      "Max-speed: "        max-speed "\n"
                      "Acceleration: "     acceleration "\n"
                      "Deceleration: "     deceleration "\n"
@@ -484,7 +485,7 @@ to store-genome-child
 end
 
 to-report fitness
-  report (mean [current-speed] of cars) - (crashed-cars / ticks)
+  report ((mean [current-speed] of cars) * 100) - (crashed-cars)
 end
 
 ;; Run genome one step in time, called multiple
@@ -827,7 +828,7 @@ deceleration
 deceleration
 0
 1
-0.91
+0.98
 .01
 1
 NIL
@@ -842,7 +843,7 @@ acceleration
 acceleration
 0
 1
-0.84
+0.77
 .01
 1
 NIL
@@ -888,7 +889,7 @@ max-speed
 max-speed
 0
 1
-0.31
+0.6
 .01
 1
 NIL
@@ -1009,7 +1010,7 @@ patience-coefficient
 patience-coefficient
 0
 1
-0.21
+0.12
 .01
 1
 NIL
@@ -1024,7 +1025,7 @@ minimum-distance-coefficient
 minimum-distance-coefficient
 0
 1
-0.46
+0.57
 .01
 1
 NIL
@@ -1054,17 +1055,17 @@ base-minimum-distance
 base-minimum-distance
 0
 10
-5.0
+10.0
 1
 1
 NIL
 HORIZONTAL
 
 OUTPUT
-521
-465
+469
+437
 730
-610
+604
 12
 
 @#$#@#$#@
