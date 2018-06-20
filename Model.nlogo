@@ -44,7 +44,6 @@ cars-own [
 globals [
   ;; Global monitoring
   crashed-cars
-  front-check-counter
   generation-count
   genome-count
 
@@ -519,6 +518,8 @@ end
 
 ;; VEHICLE PROCEDURES - CHECK SURROUNDINGS
 to check-surroundings
+  ;; set car color yellow to see what car is evaluating
+  set color yellow
   ;; check if any cars are directly to the left of the current car and if so,
   ;; get their information
   ifelse (any? cars-at relative-here relative-left) [
@@ -547,10 +548,13 @@ to check-surroundings
         one-of cars-at relative-front relative-here
       )
   ] [
-    set front-check-counter 2
+    let front-check-counter 2
     while [not any? cars-at front-check-counter relative-here and
              front-check-counter < 25] [
       set front-check-counter front-check-counter + 1
+      ask patch-at front-check-counter relative-here [ set pcolor blue ]
+      wait .1
+      ask patch-at front-check-counter relative-here [ set pcolor road-color ]
     ]
     ifelse (any? cars-at front-check-counter relative-here) [
       set car-front
@@ -602,7 +606,7 @@ to check-surroundings
   ] [
     set car-rear-right false
   ]
-
+  set color black
   ;; fill table surrounding-cars with tables car-information of surrounding cars
   table:put surrounding-cars "car-left" car-left
   table:put surrounding-cars "car-front-left" car-front-left
@@ -835,7 +839,7 @@ deceleration
 deceleration
 0
 1
-0.8
+0.05
 .01
 1
 NIL
@@ -850,7 +854,7 @@ acceleration
 acceleration
 0
 1
-0.19
+0.48
 .01
 1
 NIL
@@ -896,7 +900,7 @@ max-speed
 max-speed
 0
 1
-0.93
+0.65
 .01
 1
 NIL
@@ -1017,7 +1021,7 @@ patience-coefficient
 patience-coefficient
 0
 1
-0.76
+0.02
 .01
 1
 NIL
@@ -1032,7 +1036,7 @@ minimum-distance-coefficient
 minimum-distance-coefficient
 0
 1
-0.48
+0.66
 .01
 1
 NIL
