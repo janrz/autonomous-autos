@@ -36,6 +36,9 @@ cars-own [
   ;; table containing above information
   ;; [ car-left car-front-left car-front car-front-right car-right ]
   surrounding-cars
+
+  ;; TEST VARIABLES
+  last-decision
 ]
 
 globals [
@@ -622,6 +625,7 @@ to make-decision
           car-front-distance > (minimum-distance-coefficient * base-minimum-distance)
     ) [
     speed-up
+    set last-decision "speed-up"
   ] [
     ifelse (time-passed-since-last-move > round (
               patience-coefficient * base-patience) and
@@ -639,6 +643,7 @@ to make-decision
          )
       ) [
       move-left
+      set last-decision "move-left"
       set time-passed-since-last-move 0
     ] [
       ifelse (time-passed-since-last-move > round (
@@ -657,9 +662,11 @@ to make-decision
          )
       ) [
       move-right
+      set last-decision "move-right"
       set time-passed-since-last-move 0
     ] [
         slow-down
+        set last-decision "slow-down"
     ]
 
   ]
@@ -740,7 +747,7 @@ GRAPHICS-WINDOW
 0
 1
 ticks
-30.0
+60.0
 
 BUTTON
 6
@@ -828,7 +835,7 @@ deceleration
 deceleration
 0
 1
-0.98
+0.8
 .01
 1
 NIL
@@ -843,7 +850,7 @@ acceleration
 acceleration
 0
 1
-0.77
+0.19
 .01
 1
 NIL
@@ -889,7 +896,7 @@ max-speed
 max-speed
 0
 1
-0.6
+0.93
 .01
 1
 NIL
@@ -1010,7 +1017,7 @@ patience-coefficient
 patience-coefficient
 0
 1
-0.12
+0.76
 .01
 1
 NIL
@@ -1025,7 +1032,7 @@ minimum-distance-coefficient
 minimum-distance-coefficient
 0
 1
-0.57
+0.48
 .01
 1
 NIL
@@ -1067,6 +1074,23 @@ OUTPUT
 730
 604
 12
+
+BUTTON
+11
+461
+183
+494
+show last decisions
+ask cars with [crashed? = 1] [ print last-decision ]
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## ABOUT THE MODEL
