@@ -32,6 +32,8 @@ cars-own [
   car-rear-left        ;; information about car to the rear left
   car-rear-right       ;; information about car to the rear right
   car-front-distance
+  car-front-left-distance
+  car-front-right-distance
 
   ;; table containing above information
   ;; [ car-left car-front-left car-front car-front-right car-right ]
@@ -487,7 +489,7 @@ to store-genome-child
 end
 
 to-report fitness
-  report ((mean [current-speed] of cars) * 100) - (crashed-cars)
+  report (mean [current-speed] of cars) - (crashed-cars)
 end
 
 ;; Run genome one step in time, called multiple
@@ -520,25 +522,53 @@ end
 to check-surroundings
   ;; set car color yellow to see what car is evaluating
   set color yellow
-  ;; check if any cars are directly to the left of the current car and if so,
-  ;; get their information
-  ifelse (any? cars-at relative-here relative-left) [
-    set car-left
+  ;; only check left lane if car is not in outer left lane
+  if not (ycor = left-lane-ycor) [
+    ;; check if any cars are directly to the left of the current car and if so,
+    ;; get their information
+    ifelse (any? cars-at relative-here relative-left) [
+      set car-left
       [car-information] of (
         one-of cars-at relative-here relative-left
       )
-  ] [
-    set car-left false
-  ]
-  ;; check if any cars are to the front-left of the current car and if so,
-  ;; get their information
-  ifelse (any? cars-at relative-front relative-left) [
-    set car-front-left
+    ] [
+      set car-left false
+    ]
+    ;; check if any cars are to the front-left of the current car and if so,
+    ;; get their information
+    ifelse (any? cars-at relative-front relative-left) [
+      set car-front-left
       [car-information] of (
         one-of cars-at relative-front relative-left
       )
-  ] [
-    set car-front-left false
+    ] [
+      let front-check-counter 2
+      while [not any? cars-at front-check-counter relative-left and
+        front-check-counter < 25] [
+        set front-check-counter front-check-counter + 1
+        ask patch-at front-check-counter relative-left [ set pcolor blue ]
+        ask patch-at front-check-counter relative-left [ set pcolor road-color ]
+      ]
+      ifelse (any? cars-at front-check-counter relative-left) [
+        set car-front-left
+        [car-information] of (
+          one-of cars-at front-check-counter relative-left
+        )
+        set car-front-left-distance front-check-counter
+      ] [
+        set car-front-left false
+      ]
+    ]
+    ;; check if any cars are to the rear-left of the current car and if so,
+    ;; get their information
+    ifelse (any? cars-at relative-rear relative-left) [
+      set car-rear-left
+      [car-information] of (
+        one-of cars-at relative-rear relative-left
+      )
+    ] [
+      set car-rear-left false
+    ]
   ]
   ;; check if any cars are directly in front of the current car and if so,
   ;; get their information
@@ -553,7 +583,6 @@ to check-surroundings
              front-check-counter < 25] [
       set front-check-counter front-check-counter + 1
       ask patch-at front-check-counter relative-here [ set pcolor blue ]
-      wait .1
       ask patch-at front-check-counter relative-here [ set pcolor road-color ]
     ]
     ifelse (any? cars-at front-check-counter relative-here) [
@@ -566,45 +595,53 @@ to check-surroundings
       set car-front false
     ]
   ]
-  ;; check if any cars are to the front-right of the current car and if so,
-  ;; get their information
-  ifelse (any? cars-at relative-front relative-right) [
-    set car-front-right
+  ;; only check right lane if car is not in outer right lane
+  if not (ycor = right-lane-ycor) [
+    ;; check if any cars are to the front-right of the current car and if so,
+    ;; get their information
+    ifelse (any? cars-at relative-front relative-right) [
+      set car-front-right
       [car-information] of (
         one-of cars-at relative-front relative-right
       )
-  ] [
-    set car-front-right false
-  ]
-  ;; check if any cars are directly to the right of the current car and if so,
-  ;; get their information
-  ifelse (any? cars-at relative-here relative-right) [
-    set car-right
+    ] [
+      let front-check-counter 2
+      while [not any? cars-at front-check-counter relative-right and
+        front-check-counter < 25] [
+        set front-check-counter front-check-counter + 1
+        ask patch-at front-check-counter relative-right [ set pcolor blue ]
+        ask patch-at front-check-counter relative-right [ set pcolor road-color ]
+      ]
+      ifelse (any? cars-at front-check-counter relative-right) [
+        set car-front-right
+        [car-information] of (
+          one-of cars-at front-check-counter relative-right
+        )
+        set car-front-right-distance front-check-counter
+      ] [
+        set car-front-right false
+      ]
+    ]
+    ;; check if any cars are directly to the right of the current car and if so,
+    ;; get their information
+    ifelse (any? cars-at relative-here relative-right) [
+      set car-right
       [car-information] of (
         one-of cars-at relative-here relative-right
       )
-  ] [
-    set car-right false
-  ]
-  ;; check if any cars are to the rear-left of the current car and if so,
-  ;; get their information
-  ifelse (any? cars-at relative-rear relative-left) [
-    set car-rear-left
-      [car-information] of (
-        one-of cars-at relative-rear relative-left
-      )
-  ] [
-    set car-rear-left false
-  ]
-  ;; check if any cars are to the rear-right of the current car and if so,
-  ;; get their information
-  ifelse (any? cars-at relative-rear relative-right) [
-    set car-rear-right
+    ] [
+      set car-right false
+    ]
+    ;; check if any cars are to the rear-right of the current car and if so,
+    ;; get their information
+    ifelse (any? cars-at relative-rear relative-right) [
+      set car-rear-right
       [car-information] of (
         one-of cars-at relative-rear relative-right
       )
-  ] [
-    set car-rear-right false
+    ] [
+      set car-rear-right false
+    ]
   ]
   set color black
   ;; fill table surrounding-cars with tables car-information of surrounding cars
@@ -638,6 +675,9 @@ to make-decision
          (car-front-left = false or (
              car-front-left != false and
              table:get car-front-left "current-speed" >= current-speed
+             ) or (
+             car-front-left-distance > (
+               minimum-distance-coefficient * base-minimum-distance)
              )
          ) and
          (car-rear-left = false or (
@@ -657,6 +697,9 @@ to make-decision
          (car-front-right = false or (
              car-front-right != false and
              table:get car-front-right "current-speed" >= current-speed
+             ) or (
+             car-front-right-distance > (
+               minimum-distance-coefficient * base-minimum-distance)
              )
          ) and
          (car-rear-right = false or (
@@ -839,7 +882,7 @@ deceleration
 deceleration
 0
 1
-0.05
+0.87
 .01
 1
 NIL
@@ -854,7 +897,7 @@ acceleration
 acceleration
 0
 1
-0.48
+0.16
 .01
 1
 NIL
@@ -900,7 +943,7 @@ max-speed
 max-speed
 0
 1
-0.65
+0.73
 .01
 1
 NIL
@@ -1021,7 +1064,7 @@ patience-coefficient
 patience-coefficient
 0
 1
-0.02
+0.99
 .01
 1
 NIL
@@ -1036,7 +1079,7 @@ minimum-distance-coefficient
 minimum-distance-coefficient
 0
 1
-0.66
+0.97
 .01
 1
 NIL
