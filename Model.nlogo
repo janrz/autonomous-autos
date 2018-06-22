@@ -654,14 +654,9 @@ end
 
 ;; VEHICLE PROCEDURES - MAKE DECISION
 to make-decision
-  let car-front-speed 10
-  if (car-front != false) [
-    set car-front-speed (table:get car-front "current-speed")
-  ]
 
-  ;; make decision
   ifelse (car-front = false or
-          car-front-distance > (minimum-distance-coefficient * base-minimum-distance)
+          car-front-distance > (minimum-distance-coefficient * (table:get car-front "current-speed" * 10))
     ) [
     speed-up
     set last-decision "speed-up"
@@ -675,7 +670,7 @@ to make-decision
              table:get car-front-left "current-speed" >= current-speed
              ) or (
              car-front-left-distance > (
-               3)
+               minimum-distance-coefficient * (table:get car-front-left "current-speed" * 10))
              )
          ) and
          (car-rear-left = false or (
@@ -697,7 +692,7 @@ to make-decision
              table:get car-front-right "current-speed" >= current-speed
              ) or (
              car-front-right-distance > (
-               3)
+               minimum-distance-coefficient * (table:get car-front-right "current-speed" * 10))
              )
          ) and
          (car-rear-right = false or (
@@ -880,7 +875,7 @@ deceleration
 deceleration
 0
 1
-0.8
+0.53
 .01
 1
 NIL
@@ -895,7 +890,7 @@ acceleration
 acceleration
 0
 1
-0.0
+0.98
 .01
 1
 NIL
@@ -941,7 +936,7 @@ max-speed
 max-speed
 0
 1
-0.15
+0.68
 .01
 1
 NIL
@@ -1062,7 +1057,7 @@ patience-coefficient
 patience-coefficient
 0
 1
-0.28
+0.13
 .01
 1
 NIL
@@ -1077,7 +1072,7 @@ minimum-distance-coefficient
 minimum-distance-coefficient
 0
 1
-0.74
+0.87
 .01
 1
 NIL
@@ -1090,21 +1085,6 @@ SLIDER
 394
 base-patience
 base-patience
-0
-10
-10.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-7
-410
-175
-443
-base-minimum-distance
-base-minimum-distance
 0
 10
 10.0
