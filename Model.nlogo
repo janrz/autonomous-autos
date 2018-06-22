@@ -499,6 +499,7 @@ to run-genome
   ask cars with [crashed? = 0] [
     ;; car checks surroundings: speed, position and intention of other cars
     check-surroundings
+    ask patches with [ pcolor = blue ] [ set pcolor road-color ]
     ;; car makes decision on speed and lane: change or keep the same
     make-decision
     ;; car makes decided move
@@ -547,7 +548,6 @@ to check-surroundings
         front-check-counter < 25] [
         set front-check-counter front-check-counter + 1
         ask patch-at front-check-counter relative-left [ set pcolor blue ]
-        ask patch-at front-check-counter relative-left [ set pcolor road-color ]
       ]
       ifelse (any? cars-at front-check-counter relative-left) [
         set car-front-left
@@ -583,7 +583,6 @@ to check-surroundings
              front-check-counter < 25] [
       set front-check-counter front-check-counter + 1
       ask patch-at front-check-counter relative-here [ set pcolor blue ]
-      ask patch-at front-check-counter relative-here [ set pcolor road-color ]
     ]
     ifelse (any? cars-at front-check-counter relative-here) [
       set car-front
@@ -610,7 +609,6 @@ to check-surroundings
         front-check-counter < 25] [
         set front-check-counter front-check-counter + 1
         ask patch-at front-check-counter relative-right [ set pcolor blue ]
-        ask patch-at front-check-counter relative-right [ set pcolor road-color ]
       ]
       ifelse (any? cars-at front-check-counter relative-right) [
         set car-front-right
@@ -677,7 +675,7 @@ to make-decision
              table:get car-front-left "current-speed" >= current-speed
              ) or (
              car-front-left-distance > (
-               minimum-distance-coefficient * base-minimum-distance)
+               3)
              )
          ) and
          (car-rear-left = false or (
@@ -699,7 +697,7 @@ to make-decision
              table:get car-front-right "current-speed" >= current-speed
              ) or (
              car-front-right-distance > (
-               minimum-distance-coefficient * base-minimum-distance)
+               3)
              )
          ) and
          (car-rear-right = false or (
@@ -882,7 +880,7 @@ deceleration
 deceleration
 0
 1
-0.87
+0.8
 .01
 1
 NIL
@@ -897,7 +895,7 @@ acceleration
 acceleration
 0
 1
-0.16
+0.0
 .01
 1
 NIL
@@ -943,7 +941,7 @@ max-speed
 max-speed
 0
 1
-0.73
+0.15
 .01
 1
 NIL
@@ -1064,7 +1062,7 @@ patience-coefficient
 patience-coefficient
 0
 1
-0.99
+0.28
 .01
 1
 NIL
@@ -1079,7 +1077,7 @@ minimum-distance-coefficient
 minimum-distance-coefficient
 0
 1
-0.97
+0.74
 .01
 1
 NIL
